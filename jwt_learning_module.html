@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT — Complete Learning Module</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0b0e14;
+    --surface: #111520;
+    --card: #161b28;
+    --card2: #1c2233;
+    --border: #252d42;
+    --border2: #2e3a55;
+    --accent: #4f8cff;
+    --accent2: #7b5af6;
+    --green: #2de08a;
+    --red: #ff5a5a;
+    --amber: #ffb84f;
+    --teal: #3dd6d0;
+    --pink: #f06bff;
+    --text: #e8edf8;
+    --text2: #8a9bc4;
+    --text3: #5a6a8a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Sora', sans-serif;
+    --r: 10px;
+    --r2: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ─── HEADER ─── */
+  .hero {
+    background: linear-gradient(135deg, #0d1525 0%, #111a30 60%, #0d1020 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 72px 0 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(79,140,255,.12) 0%, transparent 70%);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(79,140,255,.12);
+    border: 1px solid rgba(79,140,255,.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 62px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 17px;
+    color: var(--text2);
+    max-width: 560px;
+    margin: 0 auto 32px;
+  }
+  .hero-tags {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ─── TOC ─── */
+  .toc-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 0;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 10px 14px;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .2s;
+  }
+  .toc-item:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,140,255,.06); }
+  .toc-num { color: var(--accent); font-family: var(--mono); font-size: 11px; min-width: 22px; }
+
+  /* ─── MAIN LAYOUT ─── */
+  main { max-width: 960px; margin: 0 auto; padding: 56px 24px; }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    background: rgba(79,140,255,.15);
+    border: 1px solid rgba(79,140,255,.3);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-label h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .section-label h2 span { color: var(--accent); }
+
+  section { margin-bottom: 72px; scroll-margin-top: 24px; }
+  p { color: var(--text2); margin-bottom: 16px; }
+  p strong { color: var(--text); font-weight: 600; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-green  { border-left: 3px solid var(--green); }
+  .card-red    { border-left: 3px solid var(--red); }
+  .card-amber  { border-left: 3px solid var(--amber); }
+  .card-pink   { border-left: 3px solid var(--pink); }
+
+  .card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  /* ─── ANALOGIES / CALLOUTS ─── */
+  .analogy-box {
+    background: linear-gradient(135deg, rgba(79,140,255,.06), rgba(123,90,246,.06));
+    border: 1px solid rgba(79,140,255,.2);
+    border-radius: var(--r2);
+    padding: 28px;
+    margin: 24px 0;
+  }
+  .analogy-box .analogy-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .analogy-box p { color: var(--text); }
+
+  /* ─── TWO-COLUMN COMPARE ─── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+  }
+  .compare-col-header {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+  .col-bad .compare-col-header  { background: rgba(255,90,90,.08);  color: var(--red);   border-bottom: 1px solid rgba(255,90,90,.15); }
+  .col-good .compare-col-header { background: rgba(45,224,138,.08); color: var(--green); border-bottom: 1px solid rgba(45,224,138,.15); }
+  .compare-col ul { list-style: none; padding: 16px 20px; }
+  .compare-col li { font-size: 14px; color: var(--text2); padding: 5px 0; display: flex; gap: 8px; align-items: flex-start; }
+  .col-bad  li::before { content: '✗'; color: var(--red);   font-weight: 700; margin-top: 1px; }
+  .col-good li::before { content: '✓'; color: var(--green); font-weight: 700; margin-top: 1px; }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: var(--r2); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--card2); }
+  thead th { padding: 12px 18px; text-align: left; font-weight: 600; color: var(--text); font-size: 13px; border-bottom: 1px solid var(--border); }
+  tbody td { padding: 11px 18px; color: var(--text2); border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(79,140,255,.03); }
+  td .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 12px;
+  }
+  .pill-red   { background: rgba(255,90,90,.12);  color: var(--red); }
+  .pill-amber { background: rgba(255,184,79,.12); color: var(--amber); }
+  .pill-green { background: rgba(45,224,138,.12); color: var(--green); }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    margin: 24px 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 6px;
+  }
+  .flow-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .flow-step-label { font-size: 11px; font-weight: 600; color: var(--text); }
+  .flow-step-sub   { font-size: 10px; color: var(--text3); }
+  .flow-arrow { color: var(--text3); font-size: 18px; padding: 0 2px; flex-shrink: 0; align-self: center; margin-top: -16px; }
+  @media (max-width: 640px) { .flow { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+
+  /* ─── JWT STRUCTURE VISUAL ─── */
+  .jwt-token {
+    display: flex;
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin: 24px 0;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .jwt-part {
+    flex: 1;
+    padding: 18px 20px;
+    text-align: center;
+  }
+  .jwt-header  { background: rgba(79,140,255,.12); border-right: 2px solid rgba(79,140,255,.3); }
+  .jwt-payload { background: rgba(123,90,246,.12); border-right: 2px solid rgba(123,90,246,.3); }
+  .jwt-sig     { background: rgba(45,224,138,.12); }
+  .jwt-part-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .jwt-header .jwt-part-label  { color: var(--accent); }
+  .jwt-payload .jwt-part-label { color: var(--accent2); }
+  .jwt-sig .jwt-part-label     { color: var(--green); }
+  .jwt-dot { color: var(--text3); font-size: 22px; font-weight: 700; display: flex; align-items: center; padding: 0 2px; background: var(--card); }
+  .jwt-part .note { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: var(--sans); }
+
+  /* ─── CODE BLOCK ─── */
+  pre {
+    background: #090d14;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+  }
+  .kw  { color: var(--accent2); }
+  .str { color: var(--green); }
+  .key { color: var(--teal); }
+  .val { color: var(--amber); }
+  .com { color: var(--text3); font-style: italic; }
+  .hdr { color: var(--accent); }
+  .bearer { color: var(--pink); }
+
+  /* ─── LIFECYCLE TIMELINE ─── */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+    margin: 20px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--green));
+    border-radius: 2px;
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 10px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+  .tl-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .tl-desc  { font-size: 13px; color: var(--text2); }
+
+  /* ─── STORAGE TABLE ─── */
+  .storage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .storage-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+  }
+  .storage-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .storage-card p  { font-size: 13px; color: var(--text2); margin: 0; }
+  .storage-risk { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-top: 8px; }
+  .risk-high   { background: rgba(255,90,90,.15);  color: var(--red); }
+  .risk-med    { background: rgba(255,184,79,.15); color: var(--amber); }
+  .risk-low    { background: rgba(45,224,138,.15); color: var(--green); }
+
+  /* ─── ATTACKER MINDSET ─── */
+  .attack-box {
+    background: linear-gradient(135deg, rgba(255,90,90,.05), rgba(123,90,246,.05));
+    border: 1px solid rgba(255,90,90,.2);
+    border-radius: var(--r2);
+    padding: 28px;
+    margin: 20px 0;
+  }
+  .attack-box .attack-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ─── BEST PRACTICES ─── */
+  .bp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .bp-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+    border-top: 3px solid var(--green);
+  }
+  .bp-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .bp-card p  { font-size: 13px; color: var(--text2); margin: 0; }
+
+  /* ─── SUMMARY ─── */
+  .summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .summary-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 20px;
+  }
+  .summary-icon { font-size: 20px; flex-shrink: 0; }
+  .summary-text { font-size: 14px; color: var(--text2); }
+  .summary-text strong { color: var(--text); font-weight: 600; }
+
+  /* ─── DIVIDER ─── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 60px 0; }
+
+  /* ─── INLINE BADGE ─── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: var(--mono);
+  }
+  .badge-blue   { background: rgba(79,140,255,.15);  color: var(--accent); }
+  .badge-purple { background: rgba(123,90,246,.15);  color: var(--accent2); }
+  .badge-green  { background: rgba(45,224,138,.15);  color: var(--green); }
+  .badge-red    { background: rgba(255,90,90,.15);   color: var(--red); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ─── PRINT ─── */
+  @media print {
+    body { background: white; color: black; font-size: 12px; }
+    .hero { background: #f0f4ff; }
+    pre  { background: #f5f5f5; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-badge">Cybersecurity Learning Module</div>
+  <h1>JSON Web <span>Tokens</span></h1>
+  <p>From zero to security-conscious — understand JWT deeply, visualize how it works, and think like an attacker.</p>
+  <div class="hero-tags">
+    <span class="tag">Beginner → Intermediate</span>
+    <span class="tag">Authentication</span>
+    <span class="tag">API Security</span>
+    <span class="tag">Bug Bounty</span>
+    <span class="tag">Web Apps</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TABLE OF CONTENTS
+════════════════════════════════════════════════ -->
+<div class="toc-wrapper">
+  <p style="color:var(--text3); font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;">Module Contents</p>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span> What is JWT?</a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span> Why JWT Exists</a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span> Real-World Analogy</a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span> JWT Workflow</a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span> Lifecycle</a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span> JWT Structure</a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span> Using JWT in Requests</a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span> Token Storage</a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span> Common Attacks</a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span> Attacker Mindset</a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span> When JWT Fails</a>
+    <a class="toc-item" href="#s12"><span class="toc-num">12</span> Best Practices</a>
+    <a class="toc-item" href="#s13"><span class="toc-num">13</span> Summary</a>
+  </div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 1 — WHAT IS JWT
+════════════════════════════════════════════════ -->
+<section id="s1">
+  <div class="section-label">
+    <div class="section-num">01</div>
+    <h2>What is <span>JWT</span>?</h2>
+  </div>
+
+  <p>Imagine you walk into a concert venue. You pay at the gate, get a <strong>wristband</strong>, and from that point on — no one asks you to pay again. Every security guard at every door just glances at your wristband and lets you through.</p>
+  <p><strong>JWT works exactly the same way on the internet.</strong> You log in once with your password. The server gives you a token — a wristband made of data. For every action you take after that, you show the wristband instead of repeating your password.</p>
+
+  <div class="analogy-box">
+    <div class="analogy-title">One-line definition</div>
+    <p style="font-size:17px; font-weight:600; color:var(--text);">JWT = A tamper-proof digital wristband that proves you are who you say you are, without the server needing to remember you.</p>
+  </div>
+
+  <p>JWT stands for <strong>JSON Web Token</strong>. It is an open standard (<a href="https://tools.ietf.org/html/rfc7519" style="color:var(--accent)">RFC 7519</a>) that defines a compact, self-contained way to securely transmit information as a JSON object.</p>
+
+  <div class="card card-accent">
+    <h3>Three words that matter</h3>
+    <ul style="list-style:none; display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
+      <li><span class="badge badge-blue">Compact</span> &nbsp;Small enough to be sent in a URL, header, or cookie.</li>
+      <li><span class="badge badge-purple">Self-contained</span> &nbsp;The token itself carries all the user information needed.</li>
+      <li><span class="badge badge-green">Signed</span> &nbsp;Cannot be tampered with — any modification breaks the signature.</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 2 — WHY JWT EXISTS
+════════════════════════════════════════════════ -->
+<section id="s2">
+  <div class="section-label">
+    <div class="section-num">02</div>
+    <h2>Why JWT <span>Exists</span></h2>
+  </div>
+
+  <p>To understand why JWT was invented, you need to first understand what it replaced — and why the old way broke down.</p>
+
+  <div class="card card-red">
+    <h3>The Old Way — Session-Based Authentication</h3>
+    <p>When you logged into a website using the old session method, here is what happened behind the scenes:</p>
+    <ol style="color:var(--text2); padding-left:20px; margin-top:8px; font-size:14px; line-height:2;">
+      <li>You submit your username and password.</li>
+      <li>The server <strong>creates a session record</strong> in its memory (or database): <span class="badge badge-purple">session_id=abc123 → user=john</span></li>
+      <li>The server sends your browser a cookie containing just the session ID.</li>
+      <li>Every time you click something, your browser sends that cookie.</li>
+      <li>The server has to <strong>look up</strong> session_id=abc123 in its storage to figure out who you are.</li>
+    </ol>
+  </div>
+
+  <p>This works fine for a single small website. But as soon as systems grow, serious problems appear.</p>
+
+  <div class="compare-grid">
+    <div class="compare-col col-bad">
+      <div class="compare-col-header">❌ Session-Based — Problems</div>
+      <ul>
+        <li>Server must store a record for every logged-in user</li>
+        <li>If the server restarts, all sessions are wiped — everyone is logged out</li>
+        <li>Hard to scale: two servers don't share each other's session memory</li>
+        <li>Each request forces a database lookup — adds latency</li>
+        <li>Doesn't work cleanly with mobile apps or third-party APIs</li>
+        <li>Stateful: the server is burdened with remembering state</li>
+      </ul>
+    </div>
+    <div class="compare-col col-good">
+      <div class="compare-col-header">✅ JWT-Based — Solutions</div>
+      <ul>
+        <li>Server stores nothing — the token is self-contained</li>
+        <li>Server restarts are harmless — the token lives with the client</li>
+        <li>Any server with the secret key can verify any JWT instantly</li>
+        <li>No database lookup on every request — just signature math</li>
+        <li>Works with any client: browsers, mobile, microservices, IoT</li>
+        <li>Stateless: the token is the proof</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="margin-top:24px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Aspect</th>
+          <th>Session-Based</th>
+          <th>JWT-Based</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Where state lives</td><td>Server memory / database</td><td>Inside the token (client-side)</td></tr>
+        <tr><td>Scalability</td><td>Hard (sticky sessions needed)</td><td>Easy (any server can verify)</td></tr>
+        <tr><td>Works across domains</td><td>No (cookie restrictions)</td><td>Yes (sent in header)</td></tr>
+        <tr><td>Revocation</td><td>Easy (delete the session)</td><td>Harder (requires extra logic)</td></tr>
+        <tr><td>Good for mobile/APIs</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Server memory use</td><td>Grows with users</td><td>Zero</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 3 — REAL-WORLD ANALOGY
+════════════════════════════════════════════════ -->
+<section id="s3">
+  <div class="section-label">
+    <div class="section-num">03</div>
+    <h2>The <span>Passport</span> Analogy</h2>
+  </div>
+
+  <p>The best real-world object that maps to JWT is a <strong>passport</strong>. Let's map every detail.</p>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Passport vs JWT</div>
+    <div class="table-wrap" style="margin:0; border:none;">
+      <table style="border:none;">
+        <thead>
+          <tr>
+            <th style="width:30%">Passport Feature</th>
+            <th>JWT Equivalent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Issued by a government</td><td>Issued by the server after successful login</td></tr>
+          <tr><td>Contains your name, nationality, birth date</td><td>Contains user ID, role (admin/user), expiry time</td></tr>
+          <tr><td>Has an official stamp / signature</td><td>Has a cryptographic signature</td></tr>
+          <tr><td>Any border officer can verify it (no phone call needed)</td><td>Any server with the secret key can verify the JWT instantly</td></tr>
+          <tr><td>Expires after 10 years</td><td>JWT expires after minutes, hours, or days</td></tr>
+          <tr><td>Alteration voids it — tamper-evident paper</td><td>Altering one byte breaks the signature</td></tr>
+          <tr><td>You carry it — the government doesn't follow you around</td><td>Token stored on the client — server stores nothing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p>Notice the critical insight: a border officer does <em>not</em> call the passport office to verify your passport. They just <strong>look at it</strong>, check the signature, and verify it is authentic. This is why JWT is so fast and scalable — verification is purely mathematical, not a database lookup.</p>
+
+  <div class="card card-amber">
+    <h3>The key distinction: Proof vs. Memory</h3>
+    <p style="margin:0;">With sessions, the server <em>remembers</em> you. With JWT, you <em>prove</em> yourself. This single shift in responsibility — from server to token — is what makes modern distributed systems possible.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 4 — JWT WORKFLOW
+════════════════════════════════════════════════ -->
+<section id="s4">
+  <div class="section-label">
+    <div class="section-num">04</div>
+    <h2>JWT <span>Workflow</span></h2>
+  </div>
+
+  <p>Here is the complete journey of a JWT from the moment you log in to the moment you access a protected resource.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(79,140,255,.12);">👤</div>
+      <div class="flow-step-label">User</div>
+      <div class="flow-step-sub">Enter credentials</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(255,184,79,.12);">🔐</div>
+      <div class="flow-step-label">Login Request</div>
+      <div class="flow-step-sub">POST /login</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(123,90,246,.12);">🖥️</div>
+      <div class="flow-step-label">Server Verifies</div>
+      <div class="flow-step-sub">Checks DB</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(45,224,138,.12);">🎫</div>
+      <div class="flow-step-label">JWT Created</div>
+      <div class="flow-step-sub">Signed token</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(61,214,208,.12);">💾</div>
+      <div class="flow-step-label">Token Stored</div>
+      <div class="flow-step-sub">Client-side</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(240,107,255,.12);">📤</div>
+      <div class="flow-step-label">Request + Token</div>
+      <div class="flow-step-sub">Every API call</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon" style="background:rgba(45,224,138,.12);">✅</div>
+      <div class="flow-step-label">Access Granted</div>
+      <div class="flow-step-sub">Or rejected</div>
+    </div>
+  </div>
+
+  <p>Let's walk through each step in detail:</p>
+
+  <div class="card card-accent" style="margin-bottom:12px;">
+    <h3>Step 1 — User submits credentials</h3>
+    <p style="margin:0;">The user enters their email and password. This is the <strong>only time</strong> the password is used. It is sent over HTTPS to the server. The password itself is never stored anywhere after this point.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:12px; border-left:3px solid var(--accent2);">
+    <h3>Step 2 — Server authenticates the user</h3>
+    <p style="margin:0;">The server looks up the user in the database, compares the hashed password, and confirms the user is real. If credentials are wrong — no token is issued and the request is rejected immediately.</p>
+  </div>
+
+  <div class="card card-green" style="margin-bottom:12px;">
+    <h3>Step 3 — Server creates and signs the JWT</h3>
+    <p style="margin:0;">The server bundles user information (user ID, role, expiry time) into a JSON object, then <strong>cryptographically signs</strong> it using a secret key. The token is now ready to be issued. The server does NOT store this token anywhere.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:12px; border-left:3px solid var(--teal);">
+    <h3>Step 4 — Token is sent to the client</h3>
+    <p style="margin:0;">The server sends the JWT back in its HTTP response. The client — whether a browser, mobile app, or another service — receives and stores it.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:12px; border-left:3px solid var(--amber);">
+    <h3>Step 5 — Client sends token with every request</h3>
+    <p style="margin:0;">For every subsequent API call, the client attaches the JWT inside the <code style="color:var(--accent);font-family:var(--mono);">Authorization</code> header as a Bearer token. No password is sent again.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Step 6 — Server verifies the signature</h3>
+    <p style="margin:0;">The server receives the request, extracts the JWT, and <strong>mathematically verifies</strong> the signature using its secret key. If the signature is valid and the token hasn't expired — access is granted. If anything is wrong — access is denied immediately.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 5 — LIFECYCLE
+════════════════════════════════════════════════ -->
+<section id="s5">
+  <div class="section-label">
+    <div class="section-num">05</div>
+    <h2>JWT <span>Lifecycle</span></h2>
+  </div>
+
+  <p>A JWT is not permanent. It has a birth, a useful life, and a death. Understanding this lifecycle is crucial for both development and security.</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-title">🔑 Login — Token is Born</div>
+      <div class="tl-desc">User authenticates. Server creates a signed JWT with an <code style="color:var(--accent);font-family:var(--mono);">iat</code> (issued-at) and <code style="color:var(--accent);font-family:var(--mono);">exp</code> (expiry) timestamp baked into the payload. Token is sent to the client.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">🚀 Active Use — Token in Flight</div>
+      <div class="tl-desc">The client attaches the token to every API request in the Authorization header. The server verifies the signature and expiry on each request. This phase typically lasts minutes to hours.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">🔄 Refresh (Optional) — Token Renewed</div>
+      <div class="tl-desc">Before the access token expires, many systems issue a long-lived <strong>refresh token</strong>. The client uses this to get a new access JWT without forcing the user to log in again. Access tokens stay short-lived; refresh tokens are stored securely.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">⏰ Expiry — Token Dies</div>
+      <div class="tl-desc">When the <code style="color:var(--amber);font-family:var(--mono);">exp</code> timestamp passes, the token is no longer valid. Any request with an expired token receives a <code style="color:var(--red);font-family:var(--mono);">401 Unauthorized</code> response.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">🔁 Re-Login — Cycle Repeats</div>
+      <div class="tl-desc">Without a refresh token (or when the refresh token itself expires), the user must log in again. A new JWT is issued and the cycle starts over.</div>
+    </div>
+  </div>
+
+  <div class="card card-amber">
+    <h3>Why expiry is a security feature</h3>
+    <p style="margin:0;">If a JWT is stolen, the attacker can only use it until it expires. A short expiry (15–60 minutes) limits the damage window significantly. This is why <strong>never setting an expiry time</strong> is one of the most dangerous JWT mistakes.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 6 — JWT STRUCTURE
+════════════════════════════════════════════════ -->
+<section id="s6">
+  <div class="section-label">
+    <div class="section-num">06</div>
+    <h2>JWT <span>Structure</span></h2>
+  </div>
+
+  <p>Every JWT, without exception, is made of exactly three parts, separated by dots. When you see a JWT, it looks like a long string of random characters — but it has precise internal structure.</p>
+
+  <pre><span class="hdr">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span class="bearer">eyJ1c2VySWQiOjEwMSwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzA4MzUzNjAwfQ</span>.<span class="str">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span></pre>
+
+  <p>Each part is Base64URL-encoded. Let's decode all three.</p>
+
+  <div class="jwt-token">
+    <div class="jwt-part jwt-header">
+      <div class="jwt-part-label">Part 1 — Header</div>
+      <code style="color:var(--accent); font-size:12px;">eyJhbGci...</code>
+      <div class="note">Algorithm + Token type</div>
+    </div>
+    <div class="jwt-dot">.</div>
+    <div class="jwt-part jwt-payload">
+      <div class="jwt-part-label">Part 2 — Payload</div>
+      <code style="color:var(--accent2); font-size:12px;">eyJ1c2Vy...</code>
+      <div class="note">User data (claims)</div>
+    </div>
+    <div class="jwt-dot">.</div>
+    <div class="jwt-part jwt-sig">
+      <div class="jwt-part-label">Part 3 — Signature</div>
+      <code style="color:var(--green); font-size:12px;">SflKxwRJ...</code>
+      <div class="note">Tamper-proof proof</div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="card" style="border-left:3px solid var(--accent); margin-top:28px;">
+    <h3 style="color:var(--accent);">Part 1 — Header</h3>
+    <p>The header is a JSON object that tells the receiver two things: what <em>type</em> of token this is, and which <em>algorithm</em> was used to sign it.</p>
+    <pre>{
+  <span class="key">"alg"</span>: <span class="str">"HS256"</span>,   <span class="com">// Signing algorithm (HS256 or RS256)</span>
+  <span class="key">"typ"</span>: <span class="str">"JWT"</span>    <span class="com">// Always "JWT"</span>
+}</pre>
+    <p style="margin:0;"><strong>Security note:</strong> The algorithm field is critical. An attacker can try to change <code style="font-family:var(--mono); color:var(--red);">"alg":"none"</code> to bypass signature checking entirely — a famous JWT attack (covered in section 9).</p>
+  </div>
+
+  <!-- PAYLOAD -->
+  <div class="card" style="border-left:3px solid var(--accent2); margin-top:16px;">
+    <h3 style="color:var(--accent2);">Part 2 — Payload (Claims)</h3>
+    <p>The payload is where the actual user data lives. Each piece of data is called a <strong>claim</strong>.</p>
+    <pre>{
+  <span class="key">"sub"</span>:    <span class="val">101</span>,            <span class="com">// Subject — the user ID</span>
+  <span class="key">"email"</span>: <span class="str">"john@acme.com"</span>, <span class="com">// Custom claim</span>
+  <span class="key">"role"</span>:  <span class="str">"admin"</span>,         <span class="com">// User's role/permission level</span>
+  <span class="key">"iat"</span>:   <span class="val">1708350000</span>,     <span class="com">// Issued at (Unix timestamp)</span>
+  <span class="key">"exp"</span>:   <span class="val">1708353600</span>      <span class="com">// Expires at (1 hour later)</span>
+}</pre>
+    <div class="compare-grid" style="margin-top:14px;">
+      <div class="card" style="padding:14px; margin:0; border:1px solid rgba(45,224,138,.2);">
+        <h4 style="font-size:13px; color:var(--green); margin-bottom:6px;">✅ Readable</h4>
+        <p style="margin:0; font-size:13px;">The payload is only Base64-encoded, NOT encrypted. Anyone who has the token can decode and read the payload.</p>
+      </div>
+      <div class="card" style="padding:14px; margin:0; border:1px solid rgba(255,90,90,.2);">
+        <h4 style="font-size:13px; color:var(--red); margin-bottom:6px;">❌ Do NOT store secrets here</h4>
+        <p style="margin:0; font-size:13px;">Never put passwords, credit card numbers, or truly sensitive data in the payload. It is visible to anyone holding the token.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="card" style="border-left:3px solid var(--green); margin-top:16px;">
+    <h3 style="color:var(--green);">Part 3 — Signature (The Trust Engine)</h3>
+    <p>The signature is the most important part of JWT. It is what makes the whole system trustworthy. Here's exactly how it is created:</p>
+    <pre><span class="com">// Pseudocode — how the signature is generated</span>
+<span class="kw">signature</span> = HMAC_SHA256(
+  base64url(header) + <span class="str">"."</span> + base64url(payload),
+  <span class="str">SECRET_KEY</span>
+)</pre>
+    <p>The server takes the encoded header and payload, appends the <strong>secret key</strong> that only it knows, and runs the whole thing through a hashing algorithm. The output is the signature.</p>
+    <div class="analogy-box" style="margin-top:14px; padding:18px;">
+      <div class="analogy-title" style="font-size:11px;">Why tampering is impossible</div>
+      <p style="margin:0; font-size:14px;">If an attacker changes <code style="font-family:var(--mono); color:var(--red);">"role":"user"</code> to <code style="font-family:var(--mono); color:var(--red);">"role":"admin"</code> in the payload, the signature check will fail. The server will recompute the expected signature and it will not match the one in the token. The request will be rejected. The attacker cannot forge a valid signature without knowing the secret key.</p>
+    </div>
+  </div>
+
+  <!-- Visibility summary -->
+  <div class="table-wrap" style="margin-top:28px;">
+    <table>
+      <thead>
+        <tr><th>Part</th><th>Encoded?</th><th>Encrypted?</th><th>Readable?</th><th>Tamper-proof?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Header</strong></td>
+          <td>Base64URL</td>
+          <td><span class="pill pill-red">No</span></td>
+          <td><span class="pill pill-amber">Yes</span></td>
+          <td><span class="pill pill-green">Yes (via signature)</span></td>
+        </tr>
+        <tr>
+          <td><strong>Payload</strong></td>
+          <td>Base64URL</td>
+          <td><span class="pill pill-red">No</span></td>
+          <td><span class="pill pill-amber">Yes</span></td>
+          <td><span class="pill pill-green">Yes (via signature)</span></td>
+        </tr>
+        <tr>
+          <td><strong>Signature</strong></td>
+          <td>Base64URL</td>
+          <td>N/A (hashed)</td>
+          <td><span class="pill pill-red">No (hash)</span></td>
+          <td><span class="pill pill-green">Yes — it IS the proof</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card card-amber" style="margin-top:20px;">
+    <h3>HS256 vs RS256 — Which Algorithm?</h3>
+    <div class="table-wrap" style="margin:12px 0 0; border:none;">
+      <table>
+        <thead><tr><th>Algorithm</th><th>Key Type</th><th>Who signs</th><th>Who verifies</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:var(--mono); color:var(--accent);">HS256</code></td>
+            <td>One shared secret</td>
+            <td>Server</td>
+            <td>Any service with the secret</td>
+            <td>Single-server apps</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--mono); color:var(--green);">RS256</code></td>
+            <td>Private key (sign) + Public key (verify)</td>
+            <td>Auth server (private key)</td>
+            <td>Any service (public key)</td>
+            <td>Microservices, enterprise</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin:12px 0 0; font-size:13px;">RS256 is considered more secure for distributed systems because the secret used to <em>sign</em> tokens never needs to leave the auth server — other services only need the public key to <em>verify</em>.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 7 — USING JWT IN REQUESTS
+════════════════════════════════════════════════ -->
+<section id="s7">
+  <div class="section-label">
+    <div class="section-num">07</div>
+    <h2>Using JWT in <span>Requests</span></h2>
+  </div>
+
+  <p>After login, every protected API request must carry the JWT. The standard way to do this is via the <code style="font-family:var(--mono); color:var(--accent);">Authorization</code> HTTP header with the <code style="font-family:var(--mono); color:var(--accent);">Bearer</code> scheme.</p>
+
+  <pre><span class="com">// Making a protected API request with JWT</span>
+<span class="hdr">GET</span> /api/user/profile HTTP/1.1
+<span class="hdr">Host:</span> api.acme.com
+<span class="hdr">Authorization:</span> <span class="bearer">Bearer</span> <span class="str">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMSwicm9sZSI6ImFkbWluIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+<span class="hdr">Content-Type:</span> application/json</pre>
+
+  <div class="card card-accent" style="margin-top:20px;">
+    <h3>What is "Bearer"?</h3>
+    <p style="margin:0;">The word <strong>Bearer</strong> means "the person holding this token." It signals that whoever presents this token is authorized — the server does not care <em>who</em> they are beyond what's in the token. This is precisely why stolen tokens are so dangerous: the server treats anyone holding a valid token as the legitimate user.</p>
+  </div>
+
+  <pre><span class="com">// Server-side JWT verification (Node.js example)</span>
+<span class="kw">const</span> jwt = require(<span class="str">'jsonwebtoken'</span>);
+
+<span class="kw">function</span> verifyToken(req, res, next) {
+  <span class="kw">const</span> authHeader = req.headers[<span class="str">'authorization'</span>];
+  <span class="kw">const</span> token = authHeader?.split(<span class="str">' '</span>)[<span class="val">1</span>]; <span class="com">// Extract after "Bearer "</span>
+
+  <span class="kw">if</span> (!token) <span class="kw">return</span> res.status(<span class="val">401</span>).json({ error: <span class="str">'No token provided'</span> });
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> decoded = jwt.verify(token, process.env.<span class="hdr">JWT_SECRET</span>);
+    req.user = decoded; <span class="com">// Attach decoded payload to request</span>
+    next();
+  } <span class="kw">catch</span> (err) {
+    res.status(<span class="val">403</span>).json({ error: <span class="str">'Invalid or expired token'</span> });
+  }
+}</pre>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 8 — TOKEN STORAGE
+════════════════════════════════════════════════ -->
+<section id="s8">
+  <div class="section-label">
+    <div class="section-num">08</div>
+    <h2>Token <span>Storage</span></h2>
+  </div>
+
+  <p>Where you store the JWT on the client side has major security implications. There is no option without some risk — the key is choosing the right trade-off for your threat model.</p>
+
+  <div class="storage-grid">
+    <div class="storage-card">
+      <h4>localStorage</h4>
+      <p>Persists across browser sessions. Easy to access with JavaScript.</p>
+      <span class="storage-risk risk-high">High Risk</span>
+      <p style="margin-top:8px; font-size:12px; color:var(--text3);">Any JavaScript on the page — including injected scripts from XSS attacks — can read localStorage. A single XSS vulnerability = full token theft.</p>
+    </div>
+    <div class="storage-card">
+      <h4>sessionStorage</h4>
+      <p>Cleared when the tab is closed. Slightly better than localStorage.</p>
+      <span class="storage-risk risk-high">High Risk</span>
+      <p style="margin-top:8px; font-size:12px; color:var(--text3);">Still vulnerable to XSS. An attacker who can run JavaScript can steal the token before the session ends.</p>
+    </div>
+    <div class="storage-card">
+      <h4>HttpOnly Cookie</h4>
+      <p>The browser handles it automatically. JavaScript cannot access it.</p>
+      <span class="storage-risk risk-low">Recommended</span>
+      <p style="margin-top:8px; font-size:12px; color:var(--text3);">Immune to XSS token theft since JavaScript can't read it. Requires CSRF protection (use SameSite=Strict or anti-CSRF tokens).</p>
+    </div>
+    <div class="storage-card">
+      <h4>Memory (JS Variable)</h4>
+      <p>Stored in app state. Cleared on page refresh.</p>
+      <span class="storage-risk risk-med">Medium Risk</span>
+      <p style="margin-top:8px; font-size:12px; color:var(--text3);">Most secure against XSS but impractical — users must log in again after every refresh. Used with short-lived access tokens + HttpOnly refresh tokens.</p>
+    </div>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Security Rule of Thumb</div>
+    <p style="margin:0;"><strong>Store access tokens in memory.</strong> Store refresh tokens in HttpOnly cookies. This gives you both XSS resistance (no JS access to refresh token) and CSRF resistance (short-lived access token means any stolen CSRF request expires quickly).</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 9 — COMMON ATTACKS
+════════════════════════════════════════════════ -->
+<section id="s9">
+  <div class="section-label">
+    <div class="section-num">09</div>
+    <h2>Common JWT <span>Attacks</span></h2>
+  </div>
+
+  <p>Most JWT vulnerabilities are not flaws in the JWT standard itself — they are developer mistakes in how the standard is implemented. Here are the attacks every security student must know.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Attack</th>
+          <th>How It Works</th>
+          <th>What Attacker Achieves</th>
+          <th>Severity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>alg=none Attack</strong></td>
+          <td>Attacker changes the header's algorithm to <code style="font-family:var(--mono); color:var(--red);">none</code>, then strips the signature. A vulnerable server skips signature validation entirely.</td>
+          <td>Full authentication bypass — any user ID can be claimed</td>
+          <td><span class="pill pill-red">Critical</span></td>
+        </tr>
+        <tr>
+          <td><strong>HS256/RS256 Confusion</strong></td>
+          <td>When an app uses RS256, the public key is publicly known. Attacker changes algorithm to HS256 and signs the token using the public key as the "secret." A confused server accepts it.</td>
+          <td>Forge tokens for any user including admin</td>
+          <td><span class="pill pill-red">Critical</span></td>
+        </tr>
+        <tr>
+          <td><strong>Weak Secret Key</strong></td>
+          <td>Attacker brute-forces or guesses the HMAC secret key (e.g. "secret", "password123") using tools like hashcat or jwt_tool.</td>
+          <td>Can sign arbitrary tokens with any claims</td>
+          <td><span class="pill pill-red">Critical</span></td>
+        </tr>
+        <tr>
+          <td><strong>Missing Expiry (no exp)</strong></td>
+          <td>Developer forgets to set the <code style="font-family:var(--mono); color:var(--amber);">exp</code> claim. The token is valid forever.</td>
+          <td>A stolen token works indefinitely — no expiry window</td>
+          <td><span class="pill pill-red">High</span></td>
+        </tr>
+        <tr>
+          <td><strong>Token Theft (XSS)</strong></td>
+          <td>Token stored in localStorage. Attacker injects JavaScript through an XSS vulnerability. Script reads <code style="font-family:var(--mono); color:var(--amber);">localStorage.getItem('token')</code> and sends it to attacker's server.</td>
+          <td>Full account takeover without knowing the password</td>
+          <td><span class="pill pill-red">High</span></td>
+        </tr>
+        <tr>
+          <td><strong>No Signature Verification</strong></td>
+          <td>Developer decodes the payload to get user info but never actually verifies the signature. Any JWT — real or forged — is accepted.</td>
+          <td>Complete authorization bypass</td>
+          <td><span class="pill pill-red">Critical</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sensitive Data in Payload</strong></td>
+          <td>Developer stores passwords, SSNs, or secrets in the payload. Since payload is only Base64-encoded, anyone who intercepts the token can decode it.</td>
+          <td>Data exposure even with valid tokens</td>
+          <td><span class="pill pill-amber">Medium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Insecure Transmission</strong></td>
+          <td>JWT sent over HTTP instead of HTTPS. Network attacker intercepts the token in transit (MITM).</td>
+          <td>Token theft without any code exploitation needed</td>
+          <td><span class="pill pill-red">High</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 10 — ATTACKER MINDSET
+════════════════════════════════════════════════ -->
+<section id="s10">
+  <div class="section-label">
+    <div class="section-num">10</div>
+    <h2>The <span>Attacker</span> Mindset</h2>
+  </div>
+
+  <p>A security professional must be able to think like an attacker. When an attacker sees a JWT in an application, here is exactly what goes through their mind — step by step.</p>
+
+  <div class="attack-box">
+    <div class="attack-title">⚡ Attacker's Mental Checklist</div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div style="background:rgba(255,90,90,.05); border:1px solid rgba(255,90,90,.1); border-radius:var(--r); padding:14px 18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--red); margin-bottom:6px;">Step 1 — Capture the token</div>
+        <p style="margin:0; font-size:13px; color:var(--text2);">Intercept the JWT from browser storage (DevTools → Application → localStorage), HTTP traffic, or error messages that accidentally leak it.</p>
+      </div>
+      <div style="background:rgba(255,90,90,.05); border:1px solid rgba(255,90,90,.1); border-radius:var(--r); padding:14px 18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--red); margin-bottom:6px;">Step 2 — Decode the payload</div>
+        <p style="margin:0; font-size:13px; color:var(--text2);">Paste the token into <a href="https://jwt.io" style="color:var(--accent)">jwt.io</a> or run <code style="font-family:var(--mono);">echo '[payload]' | base64 -d</code> to read all claims. Look for interesting fields: <code style="font-family:var(--mono); color:var(--amber);">role</code>, <code style="font-family:var(--mono); color:var(--amber);">admin</code>, <code style="font-family:var(--mono); color:var(--amber);">userId</code>, <code style="font-family:var(--mono); color:var(--amber);">exp</code>.</p>
+      </div>
+      <div style="background:rgba(255,90,90,.05); border:1px solid rgba(255,90,90,.1); border-radius:var(--r); padding:14px 18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--red); margin-bottom:6px;">Step 3 — Try alg=none</div>
+        <p style="margin:0; font-size:13px; color:var(--text2);">Change the algorithm in the header to <code style="font-family:var(--mono); color:var(--red);">"alg":"none"</code>, modify the payload (e.g. escalate role to admin), remove the signature, and re-encode. If the server doesn't enforce algorithm, the forged token is accepted.</p>
+      </div>
+      <div style="background:rgba(255,90,90,.05); border:1px solid rgba(255,90,90,.1); border-radius:var(--r); padding:14px 18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--red); margin-bottom:6px;">Step 4 — Try to crack the secret</div>
+        <p style="margin:0; font-size:13px; color:var(--text2);">Use <code style="font-family:var(--mono);">hashcat</code> with a wordlist: <code style="font-family:var(--mono);">hashcat -m 16500 token.txt rockyou.txt</code>. If the secret is weak (e.g. "secret", "jwt", "password"), it can be cracked in seconds.</p>
+      </div>
+      <div style="background:rgba(255,90,90,.05); border:1px solid rgba(255,90,90,.1); border-radius:var(--r); padding:14px 18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--red); margin-bottom:6px;">Step 5 — Check for missing verification</div>
+        <p style="margin:0; font-size:13px; color:var(--text2);">Modify the payload without changing the signature. If the server still accepts the modified token, it is not verifying the signature at all — one of the worst possible JWT bugs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-red" style="margin-top:20px;">
+    <h3>What attackers actually target</h3>
+    <p style="margin:0;">The payload's <code style="font-family:var(--mono); color:var(--amber);">role</code> field is the most valuable target — changing <code style="font-family:var(--mono);">"role":"user"</code> to <code style="font-family:var(--mono);">"role":"admin"</code> is the dream. The <code style="font-family:var(--mono); color:var(--amber);">userId</code> or <code style="font-family:var(--mono); color:var(--amber);">sub</code> field is the second target — changing it lets the attacker impersonate any other user (IDOR via JWT). The <code style="font-family:var(--mono); color:var(--amber);">exp</code> field is also interesting — changing it to a future date could extend a stolen token's validity if the server trusts the payload instead of enforcing server-side time checks.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 11 — WHEN JWT FAILS
+════════════════════════════════════════════════ -->
+<section id="s11">
+  <div class="section-label">
+    <div class="section-num">11</div>
+    <h2>When JWT <span>Fails</span></h2>
+  </div>
+
+  <p>JWT is not a silver bullet. It has genuine architectural limitations that every developer and security engineer must understand.</p>
+
+  <div class="card card-red">
+    <h3>Problem 1 — You Cannot Instantly Revoke a JWT</h3>
+    <p>This is the biggest weakness of JWT's stateless design. Because the server stores nothing, there is no way to "delete" a token. If a user logs out, you can delete the token from their browser — but if an attacker already copied it, their copy still works until it expires.</p>
+    <p style="margin:0;"><strong>Workarounds:</strong> Maintain a token blocklist (a Redis set of revoked JTI claims). Or use very short expiry times (15 minutes) with refresh tokens. Both approaches partially re-introduce state — a trade-off that must be consciously made.</p>
+  </div>
+
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>Problem 2 — Logout is a Lie (Without Extra Work)</h3>
+    <p>When you call <code style="font-family:var(--mono); color:var(--accent);">POST /logout</code> and the server just tells the client to delete its token — the token itself is still valid on the server side. A malicious client (or attacker) can keep using it. True server-side logout requires token revocation infrastructure.</p>
+    <p style="margin:0;"><strong>Real logout needs:</strong> Deleting the token client-side AND adding the token's unique ID (<code style="font-family:var(--mono); color:var(--amber);">jti</code> claim) to a server-side blocklist.</p>
+  </div>
+
+  <div class="card card-red" style="margin-top:14px;">
+    <h3>Problem 3 — Over-Trusting the Payload</h3>
+    <p>A dangerous anti-pattern: developers write code like <code style="font-family:var(--mono); color:var(--red);">if (token.role === 'admin')</code> without first verifying the signature. If signature verification is skipped or done incorrectly, any attacker who modifies the payload bypasses all access control.</p>
+    <p style="margin:0;"><strong>Rule:</strong> Always verify the signature first. The payload is meaningless until the signature is confirmed valid.</p>
+  </div>
+
+  <div class="card card-amber" style="margin-top:14px;">
+    <h3>Problem 4 — Token Size Growth</h3>
+    <p style="margin:0;">JWT grows with every claim added to the payload. In high-traffic APIs, hundreds of megabytes of bandwidth per day can be spent transmitting bloated tokens. Keep payloads lean — only store what is necessary for authorization decisions.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 12 — BEST PRACTICES
+════════════════════════════════════════════════ -->
+<section id="s12">
+  <div class="section-label">
+    <div class="section-num">12</div>
+    <h2>Best <span>Practices</span></h2>
+  </div>
+
+  <p>Follow these practices and you will avoid the vast majority of JWT vulnerabilities found in production applications.</p>
+
+  <div class="bp-grid">
+    <div class="bp-card">
+      <h4>Always verify the signature</h4>
+      <p>Use a battle-tested JWT library. Never decode the payload manually without first calling <code style="font-family:var(--mono); color:var(--green);">verify()</code>. Never trust the payload on faith.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Always set an expiry time</h4>
+      <p>Access tokens: 15–60 minutes. Never issue tokens without <code style="font-family:var(--mono); color:var(--green);">exp</code>. Use refresh tokens for persistence instead of long-lived access tokens.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Use a strong secret key</h4>
+      <p>At minimum 256 bits of randomness for HS256. Generate with: <code style="font-family:var(--mono); color:var(--green);">openssl rand -base64 64</code>. Never use dictionary words.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Prefer RS256 for distributed systems</h4>
+      <p>If multiple services need to verify tokens, RS256 lets them verify with the public key — without ever exposing the private signing key.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Whitelist allowed algorithms</h4>
+      <p>Explicitly specify which algorithm your server accepts. Reject tokens with <code style="font-family:var(--mono); color:var(--red);">"alg":"none"</code>. Never use dynamic algorithm selection from the token itself.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Store securely on client</h4>
+      <p>HttpOnly cookies for refresh tokens. Memory-only for access tokens in SPAs. Never store sensitive tokens in localStorage.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Transmit over HTTPS only</h4>
+      <p>Add <code style="font-family:var(--mono); color:var(--green);">Secure</code> flag to cookies. Enforce HTTPS on all endpoints. A token transmitted over HTTP can be stolen by any network observer.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Implement a token blocklist</h4>
+      <p>Use Redis to store revoked <code style="font-family:var(--mono); color:var(--green);">jti</code> values for critical operations (logout, password change, account compromise). Check on every request.</p>
+    </div>
+    <div class="bp-card">
+      <h4>Keep payload minimal</h4>
+      <p>Only include what is needed for authorization. No passwords, no secrets, no PII beyond what is strictly necessary. Remember: payload is readable by anyone with the token.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 13 — SUMMARY
+════════════════════════════════════════════════ -->
+<section id="s13">
+  <div class="section-label">
+    <div class="section-num">13</div>
+    <h2>Summary — <span>Key Takeaways</span></h2>
+  </div>
+
+  <p>If you remember nothing else from this module, remember these five things.</p>
+
+  <div class="summary-items">
+    <div class="summary-item">
+      <div class="summary-icon">🎫</div>
+      <div class="summary-text"><strong>JWT is a signed digital passport.</strong> After login, the server issues a cryptographically signed token. The client presents this token with every request instead of resending the password. The server verifies the signature — no database lookup needed.</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-icon">🔒</div>
+      <div class="summary-text"><strong>Trust comes from the signature, not the payload.</strong> The payload is readable by anyone. The signature — created from Header + Payload + Secret Key — is what makes the token tamper-proof. Always verify the signature before trusting any claim.</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-icon">⏰</div>
+      <div class="summary-text"><strong>Expiry is a security feature, not an inconvenience.</strong> Short-lived tokens limit the damage window when stolen. Always set <code style="font-family:var(--mono); color:var(--amber);">exp</code>. Pair with refresh tokens for seamless user experience without sacrificing security.</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-icon">⚠️</div>
+      <div class="summary-text"><strong>Most JWT attacks exploit implementation mistakes.</strong> alg=none, weak secrets, missing verification, no expiry, and storing tokens in localStorage account for the overwhelming majority of JWT vulnerabilities found in real applications.</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-icon">🚫</div>
+      <div class="summary-text"><strong>JWT has trade-offs.</strong> Stateless design means instant revocation is impossible by default. True logout requires a blocklist. Over-trusting the payload without signature verification is a critical flaw. Use JWT where it fits — not as a universal solution for all authentication needs.</div>
+    </div>
+  </div>
+
+  <div class="analogy-box" style="margin-top:36px;">
+    <div class="analogy-title">The Complete Picture in One Paragraph</div>
+    <p style="margin:0; font-size:15px; color:var(--text); line-height:1.8;">JWT replaced server-side sessions by moving the authentication state from the server to the client. A signed token — containing user identity, role, and expiry — is issued at login and presented with every request. The three-part structure (Header.Payload.Signature) ensures the token can be read by anyone but only forged by someone who knows the secret key. Its stateless nature makes it ideal for distributed systems and APIs, but creates genuine challenges for revocation. Security depends almost entirely on correct implementation: strong secrets, proper signature verification, short expiry, and secure storage.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer style="margin-top:80px; padding:32px 0; border-top:1px solid var(--border); text-align:center;">
+  <p style="color:var(--text3); font-size:13px;">JWT Learning Module — Cybersecurity Curriculum</p>
+  <p style="color:var(--text3); font-size:12px; margin-top:4px;">For classroom teaching · Self-learning · Cybersecurity training · Bug bounty preparation</p>
+  <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+    <a href="https://jwt.io" style="color:var(--accent); font-size:12px; text-decoration:none; background:rgba(79,140,255,.08); border:1px solid rgba(79,140,255,.2); padding:4px 12px; border-radius:12px;">jwt.io — Debugger</a>
+    <a href="https://tools.ietf.org/html/rfc7519" style="color:var(--accent); font-size:12px; text-decoration:none; background:rgba(79,140,255,.08); border:1px solid rgba(79,140,255,.2); padding:4px 12px; border-radius:12px;">RFC 7519 — Standard</a>
+    <a href="https://owasp.org/www-community/vulnerabilities/JSON_Web_Token_Cheat_Sheet_for_Java" style="color:var(--accent); font-size:12px; text-decoration:none; background:rgba(79,140,255,.08); border:1px solid rgba(79,140,255,.2); padding:4px 12px; border-radius:12px;">OWASP JWT Cheat Sheet</a>
+  </div>
+</footer>
+
+</main>
+</body>
+</html>
